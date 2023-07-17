@@ -13,5 +13,10 @@ int main(int ac, char *av[]) {
 	std::string password = av[2];
 
 	IRC irc(port, password);
+	if (irc.socketisation() == -1)
+		return 1;
+	irc.connect();
+	std::cout << "socket fd : " << irc.getSockfd() << std::endl;
+	listen(irc.getSockfd(), 3);
 	return 0;
 }
