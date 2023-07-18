@@ -1,5 +1,8 @@
-#pragma once
+#ifndef BIN_HPP
+#define BIN_HPP
 
+#include <iostream>
+#include <stdlib.h>
 #include <string>
 #include <vector>
 #include <arpa/inet.h>
@@ -7,3 +10,5 @@
 #include <iostream>
 #include <sys/socket.h>
 #include <math.h>
+
+#endif

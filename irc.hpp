@@ -1,6 +1,9 @@
-#pragma once
+#ifndef IRC_HPP
+#define IRC_HPP
 
 #include "bin.hpp"
+
+int	printError(std::string error);
 
 class IRC {
 	public:
@@ -19,3 +22,5 @@ class IRC {
 		std::string _pass;
 
 };
+
+#endif
