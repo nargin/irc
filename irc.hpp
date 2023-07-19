@@ -10,11 +10,15 @@ class IRC {
 		IRC();
 		IRC(int port, std::string password);
 		~IRC();
-		void connect();
-		int socketisation();
-		int	getSockfd() const { return this->sockfd; }
-		int	getPort() const { return this->_port; }
-		std::string getPass() const { return this->_pass; }
+
+		void launch();
+		void connect(struct sockaddr_in serv_addr);
+		void socketisation();
+		
+		/* ~~ GETTERS ~~ */
+		int	getSockfd();
+		int	getPort();
+		std::string getPass();
 
 	private:
 		int	sockfd;

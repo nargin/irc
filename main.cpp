@@ -11,9 +11,13 @@ int main(int ac, char *av[]) {
 	port = atoi(av[1]);
 	if (port < 1 || port > 65535)
 		port = default_port;	
+	
+	echo_ctl(1);
+	signal(SIGINT, handle_sigint);
+	
 	std::string password = av[2];
 
 	IRC irc(port, password);
-	irc.connect();
+	irc.launch();
 	return 0;
 }

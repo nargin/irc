@@ -8,7 +8,7 @@ LIGHTGRAY		= \033[0;37m
 GREEN			= \033[0;32m
 GRAYDRK			= \033[0;30m
 
-SRC 		= main.cpp irc.cpp
+SRC 		= main.cpp irc.cpp mysignal.cpp
 
 OBJS_DIR	= ./objs/
 OBJS 		= ${addprefix ${OBJS_DIR}, $(SRC:.cpp=.o)}

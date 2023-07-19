@@ -2,13 +2,17 @@
 #define BIN_HPP
 
 #include <iostream>
-#include <stdlib.h>
 #include <string>
+#include <stdlib.h>
 #include <vector>
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <iostream>
 #include <sys/socket.h>
 #include <math.h>
+#include <signal.h>
+#include <termios.h>
+#include <cstring>
+
+#include "mysignal.hpp"
 
 #endif
