@@ -8,7 +8,7 @@ LIGHTGRAY		= \033[0;37m
 GREEN			= \033[0;32m
 GRAYDRK			= \033[0;30m
 
-SRC 		= main.cpp irc.cpp mysignal.cpp
+SRC 		= cpp/main.cpp cpp/irc.cpp cpp/mysignal.cpp cpp/commands.cpp
 
 OBJS_DIR	= ./objs/
 OBJS 		= ${addprefix ${OBJS_DIR}, $(SRC:.cpp=.o)}
@@ -25,10 +25,10 @@ all: 		$(NAME)
 
 ${OBJS_DIR}%.o: %.cpp
 			@printf "${CLEAR}${LIGHTGRAY}${BOLD}	Compiling...${NOCOLOR}"
-			@$(CC) $(FLAGS) -c $< -o $@
+			@$(CC) $(FLAGS) -I ./hdr/ -c $< -o $@
 
 $(NAME):	$(OBJS)
-			@$(CC) $(FLAGS) $(OBJS) -o $(NAME) 
+			@$(CC) $(FLAGS) -I ./hdr/ $(OBJS) -o $(NAME) 
 			@printf "${CLEAR}${GREEN}${BOLD}	Compiled!\n${NOCOLOR}"
 
 ${OBJS}:	| ${OBJS_DIR}
