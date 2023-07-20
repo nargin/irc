@@ -36,6 +36,14 @@ ${OBJS}:	| ${OBJS_DIR}
 ${OBJS_DIR}:
 			@mkdir ${OBJS_DIR}
 
+run :
+	@echo "${GREEN}Start irc server !${NOCOLOR}"
+	@./ircserv 6667 hihi
+
+nc :
+	@echo "${GREEN}Start irc connection !${NOCOLOR}"
+	@nc -v localhost 6667
+
 clean:
 			@printf "${CLEAR}${LIGHTPURPLE}${BOLD}	Cleaned!\n${NOCOLOR}"
 			@$(RM) $(OBJS_DIR)

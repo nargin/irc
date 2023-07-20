@@ -25,6 +25,8 @@ void IRC::connect(struct sockaddr_in serv_addr) {
 		exit(printError("Error on binding"));
 }
 
+
+
 void	IRC::launch() {
 	this->socketisation();
 
@@ -46,17 +48,21 @@ void	IRC::launch() {
 	std::cout << "Client connected" << std::endl;
 
 	char buffer[1024];
+	User* newUser;
 	
 	while (1) {
 		memset(buffer, 0, sizeof(buffer));
 		int n = recv(client_fd, buffer, sizeof(buffer), 0);
 		if (n < 0)
 			printError("Error reading from socket");
-		std::cout << "Message received: " << buffer << std::endl;
-		if (!strcmp(buffer, "exit"))
+		if (!strncmp(buffer, "quit", 4) || !n)
 			break;
+		UserAction(buffer);
+		std::cout << "Message received: " << buffer << std::endl;
 	}
 
+	std::cout << "Client disconnected" << std::endl;
+	
 	close(client_fd);
 	close(this->sockfd);
 }
