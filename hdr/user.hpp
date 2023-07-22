@@ -11,16 +11,18 @@ class User {
 		void test();
 
 		/* ~~ Getters ~~ */
+		int getFd();
+		std::string getNickname();
 		std::string getUsername();
 		std::string getRealname();
 		std::string getHostname();
-		int getFd();
 
 		/* ~~ Setters ~~ */
+		void setFd(int fd);
+		void setNickname(std::string nickname);
 		void setUsername(std::string username);
 		void setRealname(std::string realname);
 		void setHostname(std::string hostname);
-		void setFd(int fd);
 	
 	private :
 		User(User const &src); // private constructor to prevent copy
@@ -30,4 +32,6 @@ class User {
 		std::string _username;
 		std::string _realname;
 		std::string _hostname;
-}
+};
+
+#endif

@@ -11,6 +11,7 @@
 #include <math.h>
 #include <signal.h>
 #include <termios.h>
+#include <unistd.h>
 #include <cstring>
 #include <map>
 

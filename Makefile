@@ -8,10 +8,10 @@ LIGHTGRAY		= \033[0;37m
 GREEN			= \033[0;32m
 GRAYDRK			= \033[0;30m
 
-SRC 		= cpp/main.cpp cpp/irc.cpp cpp/mysignal.cpp cpp/commands.cpp
+SRC 		= main.cpp irc.cpp user.cpp commands.cpp
 
 OBJS_DIR	= ./objs/
-OBJS 		= ${addprefix ${OBJS_DIR}, $(SRC:.cpp=.o)}
+OBJS 		= ${addprefix ${OBJS_DIR}, ${SRC:.cpp=.o}}
 
 CC 			= c++
 

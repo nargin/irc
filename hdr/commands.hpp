@@ -3,7 +3,7 @@
 
 #include "bin.hpp"
 
-Commands parseCommand(std::string command);
+// Commands parseCommand(std::string command);
 
 class Commands {
 	public :
@@ -21,3 +21,5 @@ class Commands {
 		std::string _flags;
 		std::string _param;
 };
+
+#endif

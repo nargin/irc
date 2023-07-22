@@ -2,6 +2,7 @@
 #define IRC_HPP
 
 #include "bin.hpp"
+#include "user.hpp"
 
 int	printError(std::string error);
 
@@ -12,18 +13,20 @@ class IRC {
 		~IRC();
 
 		void launch();
+		void newClient();
+		std::string slisten();
 		void connect(struct sockaddr_in serv_addr);
 		void socketisation();
 		
 		/* ~~ GETTERS ~~ */
-		int	getSockfd();
+		int	getNbUsers();
 		int	getPort();
+		int	getSockfd();
 		std::string getPass();
 
 	private:
-		std::map<std::string, User> _users;
-		int	sockfd;
 		int _port;
+		int	sockfd;
 		int _nbUsers;
 		User _user[10];
 		std::string _pass;
