@@ -8,7 +8,7 @@ int	printError(std::string error) {
 
 IRC::IRC() {}
 
-IRC::IRC(int port, std::string password) : _port(port), _pass(password) {}
+IRC::IRC(int port, std::string password) : _port(port), _pass(password), _nbUsers(0) {}
 IRC::~IRC() {}
 
 void IRC::socketisation() {
@@ -26,11 +26,26 @@ void IRC::connect(struct sockaddr_in serv_addr) {
 }
 
 std::string slisten(int client_fd) {
-	char buffer[1024];
-	int n = recv(client_fd, buffer, sizeof(buffer), 0);
-	if (n < 0)
-		printError("Error reading from socket");
-	return std::string str(buffer);
+	char buffer[512];
+
+	for (int loop = 0; loop < irc._nbUsers; loop++) {
+		int n = recv(client_fd, buffer, sizeof(buffer), 0);
+		if (n < 0)
+			printError("Error reading from socket");
+		return std::string str(buffer);
+	}
+}
+
+void	newClient(void) {
+		int client_fd = accept(this->sockfd, (struct sockaddr *)NULL, NULL);
+
+		if (client_fd < 0)
+			exit(printError("Error on accept"));
+		irc._nbUsers++;
+		irc._user[irc._nbUsers].setFd(client_fd);
+		irc._user[irc._nbUsers].setUsername("unset");
+		irc._user[irc._nbUsers].setRealname("unset");
+		irc._user[irc._nbUsers].setHostname("unset");
 }
 
 void	IRC::launch() {
@@ -47,15 +62,11 @@ void	IRC::launch() {
 
 		listen(this->sockfd, 10);
 
-		int client_fd = accept(this->sockfd, (struct sockaddr *)NULL, NULL);
-
-		if (client_fd < 0)
-			exit(printError("Error on accept"));
+		newClient();
 
 		data = slisten(client_fd);
 
-		irc.parseCommand();
-		std::cout << "Message received: " << buffer << std::endl;
+		// irc.parseCommand();
 	}
 
 	std::cout << "Client disconnected" << std::endl;

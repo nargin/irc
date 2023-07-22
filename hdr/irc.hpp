@@ -24,6 +24,8 @@ class IRC {
 		std::map<std::string, User> _users;
 		int	sockfd;
 		int _port;
+		int _nbUsers;
+		User _user[10];
 		std::string _pass;
 
 };
