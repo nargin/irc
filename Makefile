@@ -1,54 +1,54 @@
-NOCOLOR			= \033[0m
-BOLD			= \033[1m
-WHITE			= \033[1;37m
-RED				= \033[0;31m
-LIGHTPURPLE		= \033[1;35m
-CLEAR			= \r\033[K
-LIGHTGRAY		= \033[0;37m
-GREEN			= \033[0;32m
-GRAYDRK			= \033[0;30m
+NAME	:=	ircserv
 
-SRC 		= main.cpp irc.cpp user.cpp commands.cpp
+SOURCES	:=	./src
+INCLUDES:=	./includes
+OBJECTS	:=	./obj
 
-OBJS_DIR	= ./objs/
-OBJS 		= ${addprefix ${OBJS_DIR}, ${SRC:.cpp=.o}}
+SRCS	:=	main \
+			Client \
+			Server \
+			utils \
 
-CC 			= c++
+OBJS	:=	$(foreach src,$(SRCS),$(OBJECTS)/$(src).o)
 
-FLAGS		= -Wall -Wextra -Werror -std=c++98
+FLAGS	:=	-Wall -Wextra -Werror -std=c++98 -I includes
 
-RM  		= rm -rf
+BLACK	:=	\033[30m
+WHITE	:=	\033[37m
+RED		:=	\033[31m
+GRE		:=	\033[32m
+GRA		:=	\033[37m
+BLU		:=	\033[34m
+PUR		:=	\033[35m
+CYA		:=	\033[36m
+YELLOW	:=	\033[33m
+EOC		:=	\033[0m
 
-NAME		 = ircserv
+${OBJECTS}/%.o: ${SOURCES}/%.cpp
+	@echo "$(YELLOW)uwu: $(PUR)Compiling $^ 🤡$(EOC)"
+	@mkdir -p $(dir $@)
+	@g++ $(FLAGS) $^ -c -o $@
 
-all: 		$(NAME)
+all: $(NAME)
 
-${OBJS_DIR}%.o: %.cpp
-			@printf "${CLEAR}${LIGHTGRAY}${BOLD}	Compiling...${NOCOLOR}"
-			@$(CC) $(FLAGS) -I ./hdr/ -c $< -o $@
-
-$(NAME):	$(OBJS)
-			@$(CC) $(FLAGS) -I ./hdr/ $(OBJS) -o $(NAME) 
-			@printf "${CLEAR}${GREEN}${BOLD}	Compiled!\n${NOCOLOR}"
-
-${OBJS}:	| ${OBJS_DIR}
-
-${OBJS_DIR}:
-			@mkdir ${OBJS_DIR}
+$(NAME): $(OBJS)
+	@echo "$(WHITE)owo: $(GRE)Compiling $(NAME) 🥺 $(EOC)"
+	@g++ $(FLAGS) $(OBJS) $(LINK) -o $(NAME)
 
 run :
-	@echo "${GREEN}Start irc server !${NOCOLOR}"
-	@./ircserv 6667 hihi
+	@./$(NAME) 6667 hihi
 
 nc :
-	@echo "${GREEN}Start irc connection !${NOCOLOR}"
 	@nc -v localhost 6667
 
 clean:
-			@printf "${CLEAR}${LIGHTPURPLE}${BOLD}	Cleaned!\n${NOCOLOR}"
-			@$(RM) $(OBJS_DIR)
+	@echo "$(RED)Removing objects 💣$(EOC)"
+	@rm -rf ${OBJECTS}
 
-fclean:		clean
-			@$(RM) $(NAME)
+fclean: clean
+	@echo "$(RED)zzz Removing binary 💤$(EOC)"
+	@rm -rf $(NAME)
 
-re:			fclean $(NAME)
+re: fclean all
+
+.PHONY: all clean fclean re run bonus
