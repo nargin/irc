@@ -21,9 +21,33 @@ void Server::launchServer() {
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons(this->_port);
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
-	setsockopt(this->sockfd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
+	int optionValue = 1;
+	setsockopt(this->sockfd, SOL_SOCKET, SO_REUSEADDR, &optionValue, sizeof(optionValue));
 	if (bind(this->sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
 		exit(printError("Error on binding"));
+	
+	/* >> Listen << */
+	listen(this->sockfd, 10);
+
+	/* >> Accept << */
+	char buffer[1024];
+	struct sockaddr_in cli_addr;
+	socklen_t clilen = sizeof(cli_addr);
+	while (1) {
+		int newsockfd = accept(this->sockfd, (struct sockaddr *)&cli_addr, &clilen);
+		if (newsockfd < 0)
+			exit(printError("Error on accept"));
+		bzero(buffer, 1024);
+		int n = read(newsockfd, buffer, 1023);
+		if (n < 0)
+			exit(printError("Error reading from socket"));
+		std::cout << SERVERSPEAK << YELLOW << "Message received: " << buffer << RESET << std::endl;
+		n = write(newsockfd, MSGRECEIVED, strlen(MSGRECEIVED));
+		if (n < 0)
+			exit(printError("Error writing to socket"));
+		close(newsockfd);
+	}
+	
 }
 
 /* ~~ Getters ~~ */

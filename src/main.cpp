@@ -1,10 +1,5 @@
 #include "Server.hpp"
 
-void handle_sigint(int sig) {
-	(void)sig;
-	std::cout << std::endl;
-}
-
 void echo_ctl(int mode) {
 	struct termios term;
 	tcgetattr(0, &term);
@@ -15,12 +10,23 @@ void echo_ctl(int mode) {
 	tcsetattr(0, TCSANOW, &term);
 }
 
+void handle_sigint(int sig) {
+	std::cout << "signal num: " << sig << std::endl;
+	if (sig == SIGINT) {
+		std::cout << SERVERSPEAK << RED << "Server shutting down..." << RESET << std::endl;
+		exit(0);
+	} else if (sig == SIGQUIT) {
+		std::cout << std::endl;
+	}
+}
+
 int main(int ac, char *av[]) {
 	if (ac != 3)
 		return printError("Usage: ./ircserv [port] [password]");
 	
 	// echo_ctl(1);
 	signal(SIGINT, handle_sigint);
+	signal(SIGQUIT, handle_sigint);
 	
 	Server server(atoi(av[1]), std::string (av[2]));
 
