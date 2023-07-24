@@ -1,13 +1,18 @@
 #include "Server.hpp"
 
-Server::Server(int port, std::string password) : _port(port),  _nbUsers(0), _pass(password){
-	if (port < 1024 || port > 65535)
-		exit(printError("Port must be between 1024 and 65535"));
+Server::Server(int port, std::string password) : _nbUsers(0), _pass(password){
+	this->sockfd = -2;
+	if (port < 1024 || port > 65535) {
+		printError("Port must be between 1024 and 65535");
+		Server::~Server();
+		exit(0);
+	}
+	this->_port = port;
 	std::cout << SERVERSPEAK << GREEN << "Server starting..." << RESET << std::endl;
 	std::cout << SERVERSPEAK << YELLOW << "IRC server launched on port " << this->_port << RESET << std::endl;
 	std::cout << SERVERSPEAK << YELLOW << "Password: " << this->_pass << RESET << std::endl;
 }
-Server::~Server() { std::cout << SERVERSPEAK << RED << "Server shutting down..." << RESET << std::endl; }
+Server::~Server() { if (this->sockfd != -2) std::cout << SERVERSPEAK << RED << "Server shutting down..." << RESET << std::endl; }
 
 void Server::launchServer() {
 	/* >> Initialize socket << */
@@ -30,23 +35,24 @@ void Server::launchServer() {
 	listen(this->sockfd, 10);
 
 	/* >> Accept << */
-	char buffer[1024];
+	char buffer[512];
 	struct sockaddr_in cli_addr;
 	socklen_t clilen = sizeof(cli_addr);
+	int newsockfd = accept(this->sockfd, (struct sockaddr *)&cli_addr, &clilen);
+	if (newsockfd < 0)
+		exit(printError("Error on accept"));
 	while (1) {
-		int newsockfd = accept(this->sockfd, (struct sockaddr *)&cli_addr, &clilen);
-		if (newsockfd < 0)
-			exit(printError("Error on accept"));
-		bzero(buffer, 1024);
-		int n = read(newsockfd, buffer, 1023);
+		bzero(buffer, 512);
+		int n = read(newsockfd, buffer, 510);
+		strcat(buffer, "\r\n");
 		if (n < 0)
 			exit(printError("Error reading from socket"));
-		std::cout << SERVERSPEAK << YELLOW << "Message received: " << buffer << RESET << std::endl;
+		std::cout << SERVERSPEAK << YELLOW << "Message received: " << buffer << RESET;
 		n = write(newsockfd, MSGRECEIVED, strlen(MSGRECEIVED));
 		if (n < 0)
 			exit(printError("Error writing to socket"));
-		close(newsockfd);
 	}
+	close(newsockfd);
 	
 }
 

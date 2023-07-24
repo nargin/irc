@@ -2,9 +2,11 @@
 #define SERVER_HPP
 
 #include "Irc.hpp"
+#include "Client.hpp"
 
 class Server {
 	private :
+		std::vector<Client> _clients;
 		int _port;
 		int _nbUsers;
 		int sockfd;
