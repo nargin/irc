@@ -41,5 +41,11 @@ int main(int ac, char *av[]) {
 
 	server.launchServer();
 
+	while (1) {
+		server.newClient();
+		// server.acceptClient();
+		// server.receiveData();
+	}
+
 	return 0;
 }

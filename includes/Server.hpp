@@ -22,6 +22,9 @@ class Server {
 
 		int launchServer();
 		void newClient();
+		int acceptClient();
+		int receiveData();
+		void loopingServer();
 		int setHints(struct addrinfo *hints);
 		void setDateTime(struct tm *time);
 

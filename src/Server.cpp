@@ -75,6 +75,72 @@ int Server::launchServer() {
 	return SUCCESS;
 }
 
+void Server::newClient() {
+	Client newClient(this->_sockfd);
+	this->_clients.push_back(newClient);
+}
+
+int Server::acceptClient() {
+	int client_fd;
+	struct sockaddr_storage client_addr;
+	socklen_t sin_size = sizeof(client_addr);
+
+	if ((client_fd = accept(this->_sockfd, (struct sockaddr *)&client_addr, &sin_size)) == FAILURE)
+		return printError(SERVERSPEAK RED "Error on accepting client" RESET);
+
+	this->_clients[this->_nbUsers].setFd(client_fd);
+	this->_nbUsers++;
+
+	return SUCCESS;
+}
+
+int Server::receiveData() {
+	char buffer[1024];
+	int ret = 0;
+
+	if ((ret = recv(this->_clients[this->_nbUsers - 1].getFd(), buffer, 1024, 0)) == FAILURE)
+		return printError(SERVERSPEAK RED "Error on receiving data" RESET);
+	else if (ret == 0)
+		return printError(SERVERSPEAK RED "Client disconnected" RESET);
+	else {
+		buffer[ret] = '\0';
+		std::cout << SERVERSPEAK << YELLOW << "Received: " << buffer << RESET << std::endl;
+	}
+	return SUCCESS;
+}
+
+void Server::loopingServer(void) {
+	std::vector <pollfd> fds;
+	pollfd serverPollfd;
+
+	serverPollfd.fd = this->_sockfd;
+	serverPollfd.events = POLLIN;
+
+	fds.push_back(serverPollfd);
+
+	while (1) {
+		int pollRet = poll(&fds[0], fds.size(), -1);
+		if (pollRet == FAILURE) {
+			printError(SERVERSPEAK RED "Error on polling" RESET);
+			break; }
+		else if (pollRet == 0)
+			continue;
+		else {
+			for (size_t i = 0; i < fds.size(); i++) {
+				if (fds[i].revents & POLLIN) {
+					if (fds[i].fd == this->_sockfd) {
+						this->newClient();
+						this->acceptClient();
+					}
+					else {
+						this->receiveData();
+					}
+				}
+			}
+		}
+	}
+}
+
 /* ~~ Getters ~~ */
 int Server::getNbUsers() { return this->_nbUsers; }
 int Server::getPort() { return this->_port; }
