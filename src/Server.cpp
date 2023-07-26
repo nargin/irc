@@ -137,7 +137,7 @@ void Server::loopingServer(void) {
 					}
 				}
 			}
-		}
+		}	
 	}
 }
 
