@@ -41,11 +41,8 @@ int main(int ac, char *av[]) {
 
 	server.launchServer();
 
-	while (1) {
-		server.newClient();
-		// server.acceptClient();
-		// server.receiveData();
-	}
+	if (server.loopingServer())
+		return printError("Error on server loop");
 
 	return 0;
 }

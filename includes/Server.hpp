@@ -21,10 +21,12 @@ class Server {
 		~Server();
 
 		int launchServer();
-		void newClient();
-		int acceptClient();
-		int receiveData();
-		void loopingServer();
+		int acceptClient(std::vector <pollfd> fds, std::vector <pollfd> tempNewFds);
+		int receiveData(std::vector <pollfd> fds, std::vector <pollfd>::iterator iter);
+		void deleteClient(std::vector <pollfd> fds, std::vector <pollfd>::iterator iter);
+		int pollerrEvent(std::vector <pollfd> fds, std::vector <pollfd>::iterator iter);
+
+		int loopingServer();
 		int setHints(struct addrinfo *hints);
 		void setDateTime(struct tm *time);
 

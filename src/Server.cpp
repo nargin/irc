@@ -75,41 +75,57 @@ int Server::launchServer() {
 	return SUCCESS;
 }
 
-void Server::newClient() {
-	Client newClient(this->_sockfd);
-	this->_clients.push_back(newClient);
-}
-
-int Server::acceptClient() {
-	int client_fd;
+int Server::acceptClient(std::vector<pollfd> fds, std::vector<pollfd> tempNewFds) {
 	struct sockaddr_storage client_addr;
 	socklen_t sin_size = sizeof(client_addr);
+	int new_fd = 0;
 
-	if ((client_fd = accept(this->_sockfd, (struct sockaddr *)&client_addr, &sin_size)) == FAILURE)
+	(void)fds;
+	if ((new_fd = accept(this->_sockfd, (struct sockaddr *)&client_addr, &sin_size)) == FAILURE)
 		return printError(SERVERSPEAK RED "Error on accepting client" RESET);
 
-	this->_clients[this->_nbUsers].setFd(client_fd);
-	this->_nbUsers++;
+	std::cout << SERVERSPEAK << YELLOW << "New client connected" << RESET << std::endl;
+	std::cout << SERVERSPEAK << YELLOW << "Client fd: " << new_fd << RESET << std::endl;
+
+	pollfd newPollfd;
+	newPollfd.fd = new_fd;
+	newPollfd.events = POLLIN;
+
+	tempNewFds.push_back(newPollfd);
 
 	return SUCCESS;
 }
 
-int Server::receiveData() {
+int Server::receiveData(std::vector<pollfd> fds, std::vector<pollfd>::iterator iter) {
 	char buffer[1024];
-	int ret = 0;
+	int n = 0;
 
-	if ((ret = recv(this->_clients[this->_nbUsers - 1].getFd(), buffer, 1024, 0)) == FAILURE)
+	(void)fds;
+	if ((n = recv(iter->fd, buffer, 1024, 0)) == FAILURE)
 		return printError(SERVERSPEAK RED "Error on receiving data" RESET);
-	else if (ret == 0)
-		return printError(SERVERSPEAK RED "Client disconnected" RESET);
-	else {
-		buffer[ret] = '\0';
-		std::cout << SERVERSPEAK << YELLOW << "Received: " << buffer << RESET << std::endl;
-	}
+
+	buffer[n] = '\0';
+	std::cout << SERVERSPEAK << YELLOW << "Received data: " << buffer << RESET << std::endl;
+
 	return SUCCESS;
 }
 
-void Server::loopingServer(void) {
+void Server::deleteClient(std::vector<pollfd> fds, std::vector<pollfd>::iterator iter) {
+	std::cout << SERVERSPEAK << YELLOW << "Client disconnected fd : " << iter->fd << RESET << std::endl;
+	close(iter->fd);
+	fds.erase(iter);
+}
+
+int Server::pollerrEvent(std::vector<pollfd> fds, std::vector<pollfd>::iterator iter) {
+	if (iter->fd == this->_sockfd) {
+		std::cout << SERVERSPEAK << RED << "Error on server socket" << RESET << std::endl;
+		return FAILURE;
+	}
+	this->deleteClient(fds, iter);
+	return SUCCESS;
+}
+
+int Server::loopingServer(void) {
 	std::vector <pollfd> fds;
 	pollfd serverPollfd;
 
@@ -117,28 +133,41 @@ void Server::loopingServer(void) {
 	serverPollfd.events = POLLIN;
 
 	fds.push_back(serverPollfd);
-
+	std::cout << SERVERSPEAK << YELLOW << "Server fd: " << this->_sockfd << RESET << std::endl;
+	std::cout << "begin : "<< fds.begin()->fd << " end : " << fds.end()->fd << std::endl;
 	while (1) {
-		int pollRet = poll(&fds[0], fds.size(), -1);
-		if (pollRet == FAILURE) {
+		std::vector<pollfd> tempNewFds;
+		if (poll(&fds[0], fds.size(), -1) == FAILURE) {
 			printError(SERVERSPEAK RED "Error on polling" RESET);
-			break; }
-		else if (pollRet == 0)
-			continue;
-		else {
-			for (size_t i = 0; i < fds.size(); i++) {
-				if (fds[i].revents & POLLIN) {
-					if (fds[i].fd == this->_sockfd) {
-						this->newClient();
-						this->acceptClient();
-					}
-					else {
-						this->receiveData();
-					}
-				}
+			break;
+		}
+		std::vector<pollfd>::iterator iter = fds.begin();
+		std::cout << "test" << std::endl;
+		while (iter != fds.end()) {
+			if (iter->revents & POLLIN) {
+				if (iter->fd == this->_sockfd) {
+					if (this->acceptClient(fds, tempNewFds) == FAILURE)
+						break;
+				} else {
+					if (this->receiveData(fds, iter) == FAILURE)
+						break;
+				}				
+			} else if (iter->revents & POLLOUT) {
+				continue;
+			} else if (iter->revents & POLLERR) {
+				if (this->pollerrEvent(fds, iter) == SUCCESS)
+					break;
+				else
+					return FAILURE;
 			}
-		}	
+			iter++;
+			std::cout << "test" << std::endl;
+		}
+		fds.insert(fds.end(), tempNewFds.begin(), tempNewFds.end());
+		std::cout << "begin : "<< fds.begin()->fd << " end : " << fds.end()->fd << std::endl;
+		std::cout << "begin new : "<< tempNewFds.begin()->fd << " end new : " << tempNewFds.end()->fd << std::endl;
 	}
+	return SUCCESS;
 }
 
 /* ~~ Getters ~~ */
