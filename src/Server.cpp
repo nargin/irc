@@ -108,7 +108,7 @@ int Server::receiveData(std::vector<pollfd> fds, std::vector<pollfd>::iterator i
 		return FAILURE;
 	} else if (n == 0) {
 		this->deleteClient(fds, iter);
-		return SUCCESS;
+		return FAILURE;
 	} else {
 		buffer[n] = '\0';
 		std::cout << SERVERSPEAK << YELLOW << "Received data from fd " << iter->fd << ": " << buffer << RESET << std::endl;
@@ -116,9 +116,10 @@ int Server::receiveData(std::vector<pollfd> fds, std::vector<pollfd>::iterator i
 	}
 }
 
-void Server::deleteClient(std::vector<pollfd> fds, std::vector<pollfd>::iterator iter) {
+void Server::deleteClient(std::vector<pollfd>& fds, std::vector<pollfd>::iterator& iter) {
 	std::cout << SERVERSPEAK << YELLOW << "Client disconnected fd #" << iter->fd << RESET << std::endl;
 	close(iter->fd);
+	std::cout << SERVERSPEAK << YELLOW << "Client fd closed" << RESET << std::endl;
 	fds.erase(iter);
 	std::cout << SERVERSPEAK << YELLOW << "Client deleted" << RESET << std::endl;
 
@@ -151,6 +152,7 @@ int Server::loopingServer(void) {
 			break;
 		}
 		std::vector<pollfd>::iterator iter = fds.begin();
+		std::cout << "tester : size : " << fds.size() << std::endl;
 		while (iter != fds.end()) {
 			if (iter->revents & POLLIN) {
 				if (iter->fd == this->_sockfd) {
