@@ -21,7 +21,7 @@ class Server {
 		~Server();
 
 		int launchServer();
-		int acceptClient(std::vector <pollfd> fds, std::vector <pollfd> tempNewFds);
+		int acceptClient(std::vector <pollfd> fds, std::vector <pollfd>& tempNewFds);
 		int receiveData(std::vector <pollfd> fds, std::vector <pollfd>::iterator iter);
 		void deleteClient(std::vector <pollfd> fds, std::vector <pollfd>::iterator iter);
 		int pollerrEvent(std::vector <pollfd> fds, std::vector <pollfd>::iterator iter);

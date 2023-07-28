@@ -75,7 +75,7 @@ int Server::launchServer() {
 	return SUCCESS;
 }
 
-int Server::acceptClient(std::vector<pollfd> fds, std::vector<pollfd> tempNewFds) {
+int Server::acceptClient(std::vector<pollfd> fds, std::vector<pollfd>& tempNewFds) {
 	struct sockaddr_storage client_addr;
 	socklen_t sin_size = sizeof(client_addr);
 	int new_fd = 0;
@@ -97,23 +97,31 @@ int Server::acceptClient(std::vector<pollfd> fds, std::vector<pollfd> tempNewFds
 }
 
 int Server::receiveData(std::vector<pollfd> fds, std::vector<pollfd>::iterator iter) {
-	char buffer[1024];
+	char buffer[512];
 	int n = 0;
 
 	(void)fds;
-	if ((n = recv(iter->fd, buffer, 1024, 0)) == FAILURE)
-		return printError(SERVERSPEAK RED "Error on receiving data" RESET);
-
-	buffer[n] = '\0';
-	std::cout << SERVERSPEAK << YELLOW << "Received data: " << buffer << RESET << std::endl;
-
-	return SUCCESS;
+	n = recv(iter->fd, buffer, 510, 0);
+	if (n == FAILURE) {
+		std::cout << SERVERSPEAK << RED << "Error on receiving data" << RESET << std::endl;
+		deleteClient(fds, iter);
+		return FAILURE;
+	} else if (n == 0) {
+		this->deleteClient(fds, iter);
+		return SUCCESS;
+	} else {
+		buffer[n] = '\0';
+		std::cout << SERVERSPEAK << YELLOW << "Received data from fd " << iter->fd << ": " << buffer << RESET << std::endl;
+		return SUCCESS;
+	}
 }
 
 void Server::deleteClient(std::vector<pollfd> fds, std::vector<pollfd>::iterator iter) {
-	std::cout << SERVERSPEAK << YELLOW << "Client disconnected fd : " << iter->fd << RESET << std::endl;
+	std::cout << SERVERSPEAK << YELLOW << "Client disconnected fd #" << iter->fd << RESET << std::endl;
 	close(iter->fd);
 	fds.erase(iter);
+	std::cout << SERVERSPEAK << YELLOW << "Client deleted" << RESET << std::endl;
+
 }
 
 int Server::pollerrEvent(std::vector<pollfd> fds, std::vector<pollfd>::iterator iter) {
@@ -137,12 +145,12 @@ int Server::loopingServer(void) {
 	std::cout << "begin : "<< fds.begin()->fd << " end : " << fds.end()->fd << std::endl;
 	while (1) {
 		std::vector<pollfd> tempNewFds;
+		std::cout << "size : " << fds.size() << std::endl;
 		if (poll(&fds[0], fds.size(), -1) == FAILURE) {
 			printError(SERVERSPEAK RED "Error on polling" RESET);
 			break;
 		}
 		std::vector<pollfd>::iterator iter = fds.begin();
-		std::cout << "test" << std::endl;
 		while (iter != fds.end()) {
 			if (iter->revents & POLLIN) {
 				if (iter->fd == this->_sockfd) {
@@ -161,11 +169,8 @@ int Server::loopingServer(void) {
 					return FAILURE;
 			}
 			iter++;
-			std::cout << "test" << std::endl;
 		}
 		fds.insert(fds.end(), tempNewFds.begin(), tempNewFds.end());
-		std::cout << "begin : "<< fds.begin()->fd << " end : " << fds.end()->fd << std::endl;
-		std::cout << "begin new : "<< tempNewFds.begin()->fd << " end new : " << tempNewFds.end()->fd << std::endl;
 	}
 	return SUCCESS;
 }
