@@ -97,10 +97,11 @@ int Server::acceptClient(std::vector<pollfd> fds, std::vector<pollfd>& tempNewFd
 }
 
 int Server::receiveData(std::vector<pollfd> fds, std::vector<pollfd>::iterator iter) {
+	// Clients client;
+	
 	char buffer[512];
 	int n = 0;
 
-	(void)fds;
 	n = recv(iter->fd, buffer, 510, 0);
 	if (n == FAILURE) {
 		std::cout << SERVERSPEAK << RED << "Error on receiving data" << RESET << std::endl;
@@ -117,12 +118,10 @@ int Server::receiveData(std::vector<pollfd> fds, std::vector<pollfd>::iterator i
 }
 
 void Server::deleteClient(std::vector<pollfd>& fds, std::vector<pollfd>::iterator& iter) {
-	std::cout << SERVERSPEAK << YELLOW << "Client disconnected fd #" << iter->fd << RESET << std::endl;
+	std::cout << SERVERSPEAK << YELLOW << "Client fd #" << iter->fd << " disconnected" << RESET << std::endl;
 	close(iter->fd);
-	std::cout << SERVERSPEAK << YELLOW << "Client fd closed" << RESET << std::endl;
 	fds.erase(iter);
-	std::cout << SERVERSPEAK << YELLOW << "Client deleted" << RESET << std::endl;
-
+	DEBUG;
 }
 
 int Server::pollerrEvent(std::vector<pollfd> fds, std::vector<pollfd>::iterator iter) {
@@ -143,16 +142,15 @@ int Server::loopingServer(void) {
 
 	fds.push_back(serverPollfd);
 	std::cout << SERVERSPEAK << YELLOW << "Server fd: " << this->_sockfd << RESET << std::endl;
-	std::cout << "begin : "<< fds.begin()->fd << " end : " << fds.end()->fd << std::endl;
+	// std::cout << "begin : "<< fds.begin()->fd << " end : " << fds.end()->fd << std::endl;
 	while (1) {
 		std::vector<pollfd> tempNewFds;
-		std::cout << "size : " << fds.size() << std::endl;
 		if (poll(&fds[0], fds.size(), -1) == FAILURE) {
 			printError(SERVERSPEAK RED "Error on polling" RESET);
 			break;
 		}
 		std::vector<pollfd>::iterator iter = fds.begin();
-		std::cout << "tester : size : " << fds.size() << std::endl;
+		// std::cout << "tester : size : " << fds.size() << std::endl;
 		while (iter != fds.end()) {
 			if (iter->revents & POLLIN) {
 				if (iter->fd == this->_sockfd) {
@@ -172,6 +170,7 @@ int Server::loopingServer(void) {
 			}
 			iter++;
 		}
+		DEBUG;
 		fds.insert(fds.end(), tempNewFds.begin(), tempNewFds.end());
 	}
 	return SUCCESS;

@@ -14,7 +14,7 @@ class Server {
 		struct tm *_time;
 		struct addrinfo _hints;
 		struct addrinfo *_servinfo;
-		std::vector<Client> _clients;
+		std::map <int, Client> _clients;
 
 	public :
 		Server(int port, std::string password);
