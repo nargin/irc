@@ -75,6 +75,12 @@ int Server::launchServer() {
 	return SUCCESS;
 }
 
+void clientLimitReached(int clientFd) {
+	std::cout << SERVERSPEAK << RED << "Client limit reached" << RESET << std::endl;
+	send(clientFd, "\033[0;31mClient limit reached\033[0m", 32, 0);
+	close(clientFd);
+}
+
 void Server::newClient(int clientFd, std::vector<pollfd>& pollFd) {
 	pollfd clientPollfd;
 	Client new_client(clientFd);
@@ -85,6 +91,7 @@ void Server::newClient(int clientFd, std::vector<pollfd>& pollFd) {
 	std::cout << SERVERSPEAK << YELLOW << "New client fd #" << clientFd << " connected" << RESET << std::endl;
 
 	this->_clients.insert(std::pair<int, Client>(clientFd, new_client));
+	std::cout << "users : " << this->_clients.size() << std::endl;
 }
 
 int Server::acceptClient(std::vector<pollfd> fds, std::vector<pollfd>& tempNewFds) {
@@ -92,14 +99,14 @@ int Server::acceptClient(std::vector<pollfd> fds, std::vector<pollfd>& tempNewFd
 	socklen_t sin_size = sizeof(client_addr);
 	int new_fd = 0;
 
-	if ((new_fd = accept(_sockfd, (struct sockaddr *)&client_addr, &sin_size)) == FAILURE)
-		return printError(SERVERSPEAK RED "Error on accepting client" RESET);
-
-	if (fds.size() - 1 >= MAX_CLIENTS) {
-		send(new_fd, "\033[0;31mServer is full\033[0m", 25, 0);
-		close(new_fd);
-		return FAILURE;
+	if ((new_fd = accept(_sockfd, (struct sockaddr *)&client_addr, &sin_size)) == FAILURE) {
+		printError(SERVERSPEAK RED "Error on accepting client" RESET);
+		return CONTINUE;
 	}
+
+	std::cout << "size : " << fds.size() << " max : " << MAX_CLIENTS << std::endl;
+	if (fds.size() - 1 >= MAX_CLIENTS)
+		clientLimitReached(new_fd);
 	else
 		newClient(new_fd, tempNewFds);
 	return SUCCESS;
@@ -111,14 +118,15 @@ int Server::receiveData(std::vector<pollfd> fds, std::vector<pollfd>::iterator i
 	char buffer[512];
 	int n = 0;
 
+	bzero(buffer, 512);
 	n = recv(iter->fd, buffer, 510, 0);
 	if (n == FAILURE) {
 		std::cout << SERVERSPEAK << RED << "Error on receiving data" << RESET << std::endl;
 		deleteClient(fds, iter);
-		return FAILURE;
+		return BREAK;
 	} else if (n == 0) {
 		this->deleteClient(fds, iter);
-		return FAILURE;
+		return BREAK;
 	} else {
 		buffer[n] = '\0';
 		std::cout << SERVERSPEAK << ORANGE << "Received data from fd " << iter->fd << ": " << buffer << RESET << std::endl;
@@ -136,10 +144,13 @@ void Server::deleteClient(std::vector<pollfd>& fds, std::vector<pollfd>::iterato
 int Server::pollerrEvent(std::vector<pollfd> fds, std::vector<pollfd>::iterator iter) {
 	if (iter->fd == this->_sockfd) {
 		std::cout << SERVERSPEAK << RED << "Error on server socket" << RESET << std::endl;
-		return FAILURE;
+		return BREAK;
 	}
+
+	std::cout << SERVERSPEAK << RED << "Error on client socket" << RESET << std::endl;
 	send(iter->fd, "\033[0;31mError on client socket\033[0m", 35, 0);
 	this->deleteClient(fds, iter);
+
 	return SUCCESS;
 }
 
@@ -152,7 +163,7 @@ int Server::loopingServer(void) {
 
 	fds.push_back(serverPollfd);
 	std::cout << SERVERSPEAK << YELLOW << "Server fd: " << this->_sockfd << RESET << std::endl;
-	// std::cout << "begin : "<< fds.begin()->fd << " end : " << fds.end()->fd << std::endl;
+
 	while (1) {
 		std::vector<pollfd> tempNewFds; // Temporary vector for new clients
 
@@ -163,25 +174,26 @@ int Server::loopingServer(void) {
 
 		std::vector<pollfd>::iterator iter = fds.begin();
 		
+		DEBUG;
 		while (iter != fds.end()) {
-			DEBUG;
+
 			if (iter->revents & POLLIN) {
 			
 				/* New client or data received */
 				if (iter->fd == this->_sockfd) {
-					if (this->acceptClient(fds, tempNewFds) == SUCCESS)
+					if (this->acceptClient(fds, tempNewFds) == CONTINUE)
 						continue;
 				}
 				else
-					if (this->receiveData(fds, iter) == FAILURE)
+					if (this->receiveData(fds, iter) == BREAK)
 						break;
 			
 			}
-			else if (iter->revents & POLLOUT) {
-				continue;
-			}
+			// else if (iter->revents & POLLOUT) {
+				
+			// }
 			else if (iter->revents & POLLERR) {
-				if (this->pollerrEvent(fds, iter) == SUCCESS)
+				if (this->pollerrEvent(fds, iter) == BREAK)
 					break;
 				else return FAILURE;
 			}

@@ -6,6 +6,9 @@
 
 #define FAILURE -1
 #define SUCCESS 0
+#define CONTINUE 90
+#define BREAK 91
+#define QUIT 99
 
 #define SERVERSPEAK "\033[0;36m[SERVER]\033[0m : "
 #define CLIENTSPEAK "\033[0;35m[CLIENT]\033[0m : "
