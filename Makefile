@@ -38,6 +38,9 @@ $(NAME): $(OBJS)
 run :
 	@./$(NAME) 6667 hihi
 
+lrun :
+	@valgrind -q -s ./$(NAME) 6667 hihi
+
 nc :
 	@nc -v localhost 6667
 
