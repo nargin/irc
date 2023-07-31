@@ -70,9 +70,21 @@ int Server::launchServer() {
 	
 	/* >> Listen << */
 	if (listen(this->_sockfd, 10) == FAILURE)
-		return printError(SERVERSPEAK RED "Error on listening" RESET);\
+		return printError(SERVERSPEAK RED "Error on listening" RESET);
 
 	return SUCCESS;
+}
+
+void Server::newClient(int clientFd, std::vector<pollfd>& pollFd) {
+	pollfd clientPollfd;
+	Client new_client(clientFd);
+
+	clientPollfd.fd = clientFd;
+	clientPollfd.events = POLLIN;
+	pollFd.push_back(clientPollfd);
+	std::cout << SERVERSPEAK << YELLOW << "New client fd #" << clientFd << " connected" << RESET << std::endl;
+
+	this->_clients.insert(std::pair<int, Client>(clientFd, new_client));
 }
 
 int Server::acceptClient(std::vector<pollfd> fds, std::vector<pollfd>& tempNewFds) {
@@ -80,19 +92,16 @@ int Server::acceptClient(std::vector<pollfd> fds, std::vector<pollfd>& tempNewFd
 	socklen_t sin_size = sizeof(client_addr);
 	int new_fd = 0;
 
-	(void)fds;
-	if ((new_fd = accept(this->_sockfd, (struct sockaddr *)&client_addr, &sin_size)) == FAILURE)
+	if ((new_fd = accept(_sockfd, (struct sockaddr *)&client_addr, &sin_size)) == FAILURE)
 		return printError(SERVERSPEAK RED "Error on accepting client" RESET);
 
-	std::cout << SERVERSPEAK << YELLOW << "New client connected" << RESET << std::endl;
-	std::cout << SERVERSPEAK << YELLOW << "Client fd: " << new_fd << RESET << std::endl;
-
-	pollfd newPollfd;
-	newPollfd.fd = new_fd;
-	newPollfd.events = POLLIN;
-
-	tempNewFds.push_back(newPollfd);
-
+	if (fds.size() - 1 >= MAX_CLIENTS) {
+		send(new_fd, "\033[0;31mServer is full\033[0m", 25, 0);
+		close(new_fd);
+		return FAILURE;
+	}
+	else
+		newClient(new_fd, tempNewFds);
 	return SUCCESS;
 }
 
@@ -112,7 +121,7 @@ int Server::receiveData(std::vector<pollfd> fds, std::vector<pollfd>::iterator i
 		return FAILURE;
 	} else {
 		buffer[n] = '\0';
-		std::cout << SERVERSPEAK << YELLOW << "Received data from fd " << iter->fd << ": " << buffer << RESET << std::endl;
+		std::cout << SERVERSPEAK << ORANGE << "Received data from fd " << iter->fd << ": " << buffer << RESET << std::endl;
 		return SUCCESS;
 	}
 }
@@ -121,7 +130,7 @@ void Server::deleteClient(std::vector<pollfd>& fds, std::vector<pollfd>::iterato
 	std::cout << SERVERSPEAK << YELLOW << "Client fd #" << iter->fd << " disconnected" << RESET << std::endl;
 	close(iter->fd);
 	fds.erase(iter);
-	DEBUG;
+	this->_clients.erase(iter->fd);
 }
 
 int Server::pollerrEvent(std::vector<pollfd> fds, std::vector<pollfd>::iterator iter) {
@@ -129,6 +138,7 @@ int Server::pollerrEvent(std::vector<pollfd> fds, std::vector<pollfd>::iterator 
 		std::cout << SERVERSPEAK << RED << "Error on server socket" << RESET << std::endl;
 		return FAILURE;
 	}
+	send(iter->fd, "\033[0;31mError on client socket\033[0m", 35, 0);
 	this->deleteClient(fds, iter);
 	return SUCCESS;
 }
@@ -144,35 +154,42 @@ int Server::loopingServer(void) {
 	std::cout << SERVERSPEAK << YELLOW << "Server fd: " << this->_sockfd << RESET << std::endl;
 	// std::cout << "begin : "<< fds.begin()->fd << " end : " << fds.end()->fd << std::endl;
 	while (1) {
-		std::vector<pollfd> tempNewFds;
-		if (poll(&fds[0], fds.size(), -1) == FAILURE) {
+		std::vector<pollfd> tempNewFds; // Temporary vector for new clients
+
+		if (poll((pollfd *)&fds[0], (unsigned int)fds.size(), -1) < 1) {
 			printError(SERVERSPEAK RED "Error on polling" RESET);
 			break;
 		}
+
 		std::vector<pollfd>::iterator iter = fds.begin();
-		// std::cout << "tester : size : " << fds.size() << std::endl;
+		
 		while (iter != fds.end()) {
+			DEBUG;
 			if (iter->revents & POLLIN) {
+			
+				/* New client or data received */
 				if (iter->fd == this->_sockfd) {
-					if (this->acceptClient(fds, tempNewFds) == FAILURE)
-						break;
-				} else {
+					if (this->acceptClient(fds, tempNewFds) == SUCCESS)
+						continue;
+				}
+				else
 					if (this->receiveData(fds, iter) == FAILURE)
 						break;
-				}				
-			} else if (iter->revents & POLLOUT) {
+			
+			}
+			else if (iter->revents & POLLOUT) {
 				continue;
-			} else if (iter->revents & POLLERR) {
+			}
+			else if (iter->revents & POLLERR) {
 				if (this->pollerrEvent(fds, iter) == SUCCESS)
 					break;
-				else
-					return FAILURE;
+				else return FAILURE;
 			}
 			iter++;
 		}
-		DEBUG;
 		fds.insert(fds.end(), tempNewFds.begin(), tempNewFds.end());
 	}
+
 	return SUCCESS;
 }
 

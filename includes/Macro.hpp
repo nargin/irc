@@ -1,7 +1,7 @@
 #ifndef BIN_HPP
 #define BIN_HPP
 
-#define MAX_CLIENTS 10
+#define MAX_CLIENTS 1
 #define BUFFER_SIZE 512
 
 #define FAILURE -1
