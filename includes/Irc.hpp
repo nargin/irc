@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Irc.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rstride <rstride@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:04 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/03 03:45:31 by rstride          ###   ########.fr       */
+/*   Updated: 2023/08/03 22:30:03 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,11 +31,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sstream>
+#include <algorithm>
+#include <iterator>
 
 #include "Macro.hpp"
 #include "Colors.hpp"
 
+#define OP_PASS "[]"
+
 int	printError(std::string error);
 void setDatetime(struct tm *time);
+int isCommand(std::string input);
 
  

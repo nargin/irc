@@ -3,18 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rstride <rstride@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:02 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/03 03:45:28 by rstride          ###   ########.fr       */
+/*   Updated: 2023/08/03 22:14:43 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "bin.hpp"
+#include "Irc.hpp"
 
-// Commands parseCommand(std::string command);
 
 class Commands {
 	public :

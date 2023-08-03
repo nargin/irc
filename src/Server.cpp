@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
+/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:14 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/03 09:05:43 by romaurel         ###   ########.fr       */
+/*   Updated: 2023/08/03 22:20:30 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,7 +139,7 @@ int Server::receiveData(std::vector<pollfd>& fds, std::vector<pollfd>::iterator&
 		return BREAK;
 	} else {
 		buffer[n] = '\0';
-		parseInput(buffer, iter->fd);
+		parseInput(std::string(buffer), iter);
 		return SUCCESS;
 	}
 }

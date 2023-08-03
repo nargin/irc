@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
+/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:16 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/03 10:00:23 by romaurel         ###   ########.fr       */
+/*   Updated: 2023/08/03 22:27:58 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ int isCommand(std::string input) {
 	std::stringstream ss(input);
 	std::string command;
 	ss >> command;
+	std::cout << command << std::endl;
 	if (command == "PASS" || command == "NICK" || command == "OP")
 		return SUCCESS;
 	return FAILURE;
