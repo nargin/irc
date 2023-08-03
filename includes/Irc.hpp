@@ -1,5 +1,16 @@
-#ifndef IRC_HPP
-#define IRC_HPP
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Irc.hpp                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rstride <rstride@student.42perpignan.fr    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/08/03 03:42:04 by romaurel          #+#    #+#             */
+/*   Updated: 2023/08/03 03:45:31 by rstride          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#pragma once
 
 #include <arpa/inet.h>
 #include <cstring>
@@ -27,4 +38,4 @@
 int	printError(std::string error);
 void setDatetime(struct tm *time);
 
-#endif
+ 

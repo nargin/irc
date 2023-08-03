@@ -1,3 +1,15 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: rstride <rstride@student.42perpignan.fr    +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2023/08/03 03:42:17 by romaurel          #+#    #+#              #
+#    Updated: 2023/08/03 03:43:02 by rstride          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 NAME	:=	ircserv
 
 SOURCES	:=	./src
@@ -8,6 +20,8 @@ SRCS	:=	main \
 			Client \
 			Server \
 			utils \
+			Channel \
+			Commands \
 
 OBJS	:=	$(foreach src,$(SRCS),$(OBJECTS)/$(src).o)
 

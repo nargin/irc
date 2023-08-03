@@ -1,8 +1,20 @@
-#ifndef SERVER_HPP
-#define SERVER_HPP
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Server.hpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rstride <rstride@student.42perpignan.fr    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/08/03 03:42:07 by romaurel          #+#    #+#             */
+/*   Updated: 2023/08/03 03:45:36 by rstride          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#pragma once
 
 #include "Irc.hpp"
 #include "Client.hpp"
+#include "Channel.hpp"
 
 class Server {
 	private :
@@ -15,6 +27,7 @@ class Server {
 		struct addrinfo _hints;
 		struct addrinfo *_servinfo;
 		std::map <int, Client> _clients;
+		std::map<std::string, Channel> _channels;
 
 	public :
 		Server(int port, std::string password);
@@ -32,6 +45,8 @@ class Server {
 		int setHints(struct addrinfo *hints);
 		void setDateTime(struct tm *time);
 
+		void handle_kick_command(int client_fd, const std::string& channel_name, const std::string& user_to_kick);
+
 		/* ~~ Getters ~~ */
 		int getNbUsers();
 		int getPort();
@@ -39,5 +54,3 @@ class Server {
 		std::string getDateTime();
 		std::string getPass();
 };
-
-#endif
