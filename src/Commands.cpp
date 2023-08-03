@@ -3,16 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rstride <rstride@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:11 by rstride           #+#    #+#             */
-/*   Updated: 2023/08/03 03:46:10 by rstride          ###   ########.fr       */
+/*   Updated: 2023/08/03 09:05:35 by romaurel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 #include "Channel.hpp"
 #include "Commands.hpp"
+
+void Server::parseInput(std::string inputUser, std::vector<pollfd>::iterator& iter) {
+    if (isCommand(inputUser))
+        
+}
 
 void Server::handle_kick_command(int client_fd, const std::string& channel_name, const std::string& user_to_kick) {
     auto it = _channels.find(channel_name);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rstride <rstride@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:16 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/03 03:43:18 by rstride          ###   ########.fr       */
+/*   Updated: 2023/08/03 10:00:23 by romaurel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,5 +19,14 @@
  */
 int printError(std::string error) {
 	std::cout << RED << error << RESET << std::endl;
+	return FAILURE;
+}
+
+int isCommand(std::string input) {
+	std::stringstream ss(input);
+	std::string command;
+	ss >> command;
+	if (command == "PASS" || command == "NICK" || command == "OP")
+		return SUCCESS;
 	return FAILURE;
 }

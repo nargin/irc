@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rstride <rstride@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:07 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/03 03:45:36 by rstride          ###   ########.fr       */
+/*   Updated: 2023/08/03 09:05:50 by romaurel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ class Server {
 		void newClient(int client_fd, std::vector <pollfd>& tempNewFds);
 		void deleteClient(std::vector <pollfd>& fds, std::vector <pollfd>::iterator& iter);
 
+		void parseInput(int client_fd, std::string& command);
 		int loopingServer();
 		int setHints(struct addrinfo *hints);
 		void setDateTime(struct tm *time);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rstride <rstride@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:14 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/03 03:44:48 by rstride          ###   ########.fr       */
+/*   Updated: 2023/08/03 09:05:43 by romaurel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,7 +139,7 @@ int Server::receiveData(std::vector<pollfd>& fds, std::vector<pollfd>::iterator&
 		return BREAK;
 	} else {
 		buffer[n] = '\0';
-		std::cout << SERVERSPEAK << ORANGE << "Received data from fd " << iter->fd << ": " << buffer << RESET << std::endl;
+		parseInput(buffer, iter->fd);
 		return SUCCESS;
 	}
 }
