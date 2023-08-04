@@ -6,7 +6,7 @@
 #    By: robin <robin@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/08/03 03:42:17 by romaurel          #+#    #+#              #
-#    Updated: 2023/08/03 22:14:27 by robin            ###   ########.fr        #
+#    Updated: 2023/08/04 09:36:38 by robin            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,6 +22,7 @@ SRCS	:=	main \
 			utils \
 			Channel \
 			Commands \
+			CommandsUtils \
 
 OBJS	:=	$(foreach src,$(SRCS),$(OBJECTS)/$(src).o)
 

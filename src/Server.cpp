@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:14 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/03 22:20:30 by robin            ###   ########.fr       */
+/*   Updated: 2023/08/04 09:37:26 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,6 +139,8 @@ int Server::receiveData(std::vector<pollfd>& fds, std::vector<pollfd>::iterator&
 		return BREAK;
 	} else {
 		buffer[n] = '\0';
+		if (buffer[n - 1] == '\n')
+			buffer[n - 1] = '\0';
 		parseInput(std::string(buffer), iter);
 		return SUCCESS;
 	}

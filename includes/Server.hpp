@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:07 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/03 22:29:40 by robin            ###   ########.fr       */
+/*   Updated: 2023/08/04 09:36:08 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 #include "Irc.hpp"
 #include "Client.hpp"
 #include "Channel.hpp"
+
+bool isValidNick(std::map<int, Client>_clients, std::string nick);
 
 class Server {
 	private :
@@ -42,11 +44,13 @@ class Server {
 		void deleteClient(std::vector <pollfd>& fds, std::vector <pollfd>::iterator& iter);
 
 		void parseInput(std::string inputUser, std::vector<pollfd>::iterator& iter);
+		void commandExec(std::string inputUser, std::vector<pollfd>::iterator& it);
 		int loopingServer();
 		int setHints(struct addrinfo *hints);
 		void setDateTime(struct tm *time);
 
-		void handle_kick_command(int client_fd, const std::string& channel_name, const std::string& user_to_kick);
+		void passCommand(std::string inputUser, std::vector<pollfd>::iterator& iter);
+		void nickCommand(std::string command, std::vector<pollfd>::iterator& it);
 
 		/* ~~ Getters ~~ */
 		int getNbUsers();

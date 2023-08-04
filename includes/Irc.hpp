@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:04 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/03 22:30:03 by robin            ###   ########.fr       */
+/*   Updated: 2023/08/04 10:23:09 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,12 +35,10 @@
 #include <iterator>
 
 #include "Macro.hpp"
-#include "Colors.hpp"
 
 #define OP_PASS "[]"
 
 int	printError(std::string error);
 void setDatetime(struct tm *time);
-int isCommand(std::string input);
 
  

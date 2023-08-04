@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:11 by rstride           #+#    #+#             */
-/*   Updated: 2023/08/03 22:36:39 by robin            ###   ########.fr       */
+/*   Updated: 2023/08/04 10:27:42 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,19 +14,61 @@
 #include "Channel.hpp"
 #include "Commands.hpp"
 
-void Server::passCommand(std::string inputUser, std::vector<pollfd>::iterator& iter) {
-	std::string pass = inputUser.substr(5);
+void Server::passCommand(std::string command, std::vector<pollfd>::iterator& iter) {
+	std::string pass = command.substr(5);
+	std::map<int, Client>::iterator it = _clients.find(iter->fd);
 	if (pass == OP_PASS)
-		this->_clients[iter->fd].setPassEntered(true);
+	{
+		std::cout << "Client #" << iter->fd << " is now operator" << std::endl;
+		it->second.setOp(true);
+	}
 	else
-		std::cout << "Client #" << iter->fd << " entered a wrong password" << std::endl;
+		std::cout << "Client #" << iter->fd << " tried password " << pass << std::endl;
+}
+
+void	Server::nickCommand(std::string command, std::vector<pollfd>::iterator& it) {
+	std::string nick = command.substr(5);
+	if (command.length() < 2) {
+		send(it->fd, "ERROR :No nickname given\r\n", 26, 0);
+		return ;
+	}
+	if (nick.length() > 0 &&  _clients.find(it->fd) != _clients.end() && isValidNick(_clients, nick))
+	{
+		std::cout << SERVERSPEAK <<"Client #" << it->fd << " changed nickname to " << nick << std::endl;
+		_clients[it->fd].setNickname(nick);
+		_clients[it->fd].setRegistered(1);
+	}
+	else
+		std::cout << "Client #" << it->fd << " tried to set nickname to " << nick << std::endl;
+}
+
+void	Server::commandExec(std::string inputUser, std::vector<pollfd>::iterator& it) {
+	if (inputUser.substr(0, 4) == "PASS" && inputUser.length() > 5 && _clients.find(it->fd) != _clients.end())
+		passCommand(inputUser, it);
+	else if (inputUser.substr(0, 4) == "NICK")
+		nickCommand(inputUser, it);
+}
+
+int	commandCheck(std::string isCommand) {
+	if (isCommand.substr(0, 4) == "PASS")
+		return 1;
+	else if (isCommand.substr(0, 4) == "NICK")
+		return 1;
+	return 0;
 }
 
 void Server::parseInput(std::string inputUser, std::vector<pollfd>::iterator& iter) {
-	if (isCommand(inputUser))
-		std::cout << "Command" << std::endl;
-	else
-		std::cout << "Message" << std::endl;
+	if (commandCheck(inputUser))
+		commandExec(inputUser, iter);
+	else {
+		if (_clients[iter->fd].getOp()) std::cout << OPERATOR;
+		std::cout << CLIENTSPEAK << "Client #";
+		if (_clients[iter->fd].getRegistered())
+			std::cout << iter->fd << " (" << _clients[iter->fd].getNickname() << ")";
+		else
+			std::cout << iter->fd;
+		std::cout << " sent " << inputUser << std::endl;
+	}
 }
 
 // void Server::handle_kick_command(int client_fd, const std::string& channel_name, const std::string& user_to_kick) {

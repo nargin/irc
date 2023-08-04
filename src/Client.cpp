@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:10 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/03 22:35:30 by robin            ###   ########.fr       */
+/*   Updated: 2023/08/04 09:35:46 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 /* ~~ Public ~~ */
 
 	/* ~~ Constructors / Destructors ~~ */
+	Client::Client() {}
 	Client::Client(int client_fd) {
 		this->_fd = client_fd;
 		this->_nickname = "";
@@ -25,7 +26,7 @@
 		this->_status = 0;
 		this->_motd = 0;
 		this->_registered = 0;
-		this->_passentered = 0;
+		this->_isop = false;
 	}
 	Client::~Client() {}
 
@@ -43,7 +44,7 @@ void Client::test() { std::cout << RED << "Client test" << RESET << std::endl; }
 	int Client::getStatus() { return this->_status;}
 	int Client::getMotd() { return this->_motd;}
 	int Client::getRegistered() { return this->_registered;}
-	int Client::getPassEntered() { return this->_passentered;}
+	bool Client::getOp() { return this->_isop;}
 
 	/* ~~ Setters ~~ */
 	void Client::setFd(int fd) { this->_fd = fd;}
@@ -54,4 +55,4 @@ void Client::test() { std::cout << RED << "Client test" << RESET << std::endl; }
 	void Client::setStatus(int status) { this->_status = status;}
 	void Client::setMotd(int motd) { this->_motd = motd;}
 	void Client::setRegistered(int registered) { this->_registered = registered;}
-	void Client::setPassEntered(int passentered) { this->_passentered = passentered;}
+	void Client::setOp(int op) { this->_isop = op;}
