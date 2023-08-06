@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:07 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/04 09:36:08 by robin            ###   ########.fr       */
+/*   Updated: 2023/08/05 22:47:30 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,8 +49,8 @@ class Server {
 		int setHints(struct addrinfo *hints);
 		void setDateTime(struct tm *time);
 
-		void passCommand(std::string inputUser, std::vector<pollfd>::iterator& iter);
-		void nickCommand(std::string command, std::vector<pollfd>::iterator& it);
+		void handlePassCommand(std::string inputUser, std::vector<pollfd>::iterator& iter);
+		void handleNickCommand(std::string command, std::vector<pollfd>::iterator& it);
 
 		/* ~~ Getters ~~ */
 		int getNbUsers();

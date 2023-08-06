@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:41:59 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/04 09:35:50 by robin            ###   ########.fr       */
+/*   Updated: 2023/08/05 23:48:26 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ class Client {
 		int _status;
 		int _motd;
 		int _registered;
+		int	_nicked;
 		bool _isop;
 
 	public :
@@ -42,6 +43,7 @@ class Client {
 		int getStatus(void);
 		int getMotd(void);
 		int getRegistered(void);
+		bool getNicked(void);
 		bool getOp(void);
 
 		/* ~~ Setters ~~ */
@@ -53,6 +55,7 @@ class Client {
 		void setStatus(int status);
 		void setMotd(int motd);
 		void setRegistered(int registered);
+		void setNicked(bool nicked);
 		void setOp(int op);
 
 		bool operator==(const Client& other) const { return this->_fd == other._fd;	}

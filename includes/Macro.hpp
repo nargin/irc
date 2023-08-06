@@ -6,13 +6,13 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:05 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/04 11:18:44 by robin            ###   ########.fr       */
+/*   Updated: 2023/08/06 17:57:37 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#define MAX_CLIENTS 1
+#define MAX_CLIENTS 2
 #define BUFFER_SIZE 512
 
 #define FAILURE -1

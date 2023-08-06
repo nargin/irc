@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:10 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/04 09:35:46 by robin            ###   ########.fr       */
+/*   Updated: 2023/08/05 23:48:38 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 		this->_realname = "";
 		this->_hostname = "";
 		this->_status = 0;
+		this->_nicked = 0;
 		this->_motd = 0;
 		this->_registered = 0;
 		this->_isop = false;
@@ -44,6 +45,7 @@ void Client::test() { std::cout << RED << "Client test" << RESET << std::endl; }
 	int Client::getStatus() { return this->_status;}
 	int Client::getMotd() { return this->_motd;}
 	int Client::getRegistered() { return this->_registered;}
+	bool Client::getNicked() { return this->_nicked;}
 	bool Client::getOp() { return this->_isop;}
 
 	/* ~~ Setters ~~ */
@@ -55,4 +57,5 @@ void Client::test() { std::cout << RED << "Client test" << RESET << std::endl; }
 	void Client::setStatus(int status) { this->_status = status;}
 	void Client::setMotd(int motd) { this->_motd = motd;}
 	void Client::setRegistered(int registered) { this->_registered = registered;}
+	void Client::setNicked(bool nicked) { this->_nicked = nicked;}
 	void Client::setOp(int op) { this->_isop = op;}

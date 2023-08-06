@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:04 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/04 10:23:09 by robin            ###   ########.fr       */
+/*   Updated: 2023/08/05 23:46:24 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@
 
 #include "Macro.hpp"
 
-#define OP_PASS "[]"
+#define OP_PASS "justask"
 
 int	printError(std::string error);
 void setDatetime(struct tm *time);

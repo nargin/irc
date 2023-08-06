@@ -6,7 +6,7 @@
 /*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:14 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/04 09:37:26 by robin            ###   ########.fr       */
+/*   Updated: 2023/08/05 21:51:35 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,12 +32,10 @@ Server::Server(int port, std::string password) : _port(port), _nbUsers(0), _pass
 
 Server::~Server() { std::cout << SERVERSPEAK << RED << "Server shutting down..." << RESET << std::endl; }
 
-void Server::setDateTime(struct tm *time) {
-	char buffer[80];
-
-	strftime(buffer, sizeof(buffer),"%d-%m-%Y %H:%M:%S",time);
-
-	this->_datetime = std::string(buffer);
+void Server::setDateTime(struct tm* time) {
+    char formattedTime[20];
+    strftime(formattedTime, sizeof(formattedTime), "%d-%m-%Y %H:%M:%S", time);
+    this->_datetime = formattedTime;
 }
 
 /* 
