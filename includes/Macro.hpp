@@ -6,13 +6,13 @@
 /*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:05 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/07 08:27:42 by romaurel         ###   ########.fr       */
+/*   Updated: 2023/08/07 11:42:00 by romaurel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#define MAX_CLIENTS 2
+#define MAX_CLIENTS 10
 #define BUFFER_SIZE 512
 
 #define FAILURE -1
@@ -22,6 +22,7 @@
 #define QUIT 99
 
 # define RESET "\033[0m"
+# define GREY "\033[0;30m"
 # define ORANGE "\033[0;33m"
 # define BLACK "\033[0;30m"
 # define RED "\033[0;31m"
@@ -31,6 +32,7 @@
 # define PURPLE "\033[0;35m"
 # define CYAN "\033[0;36m"
 # define WHITE "\033[0;37m"
+
 
 # define DINO "░▄▄▄▄░\n\
 ▀▀▄██►\n\

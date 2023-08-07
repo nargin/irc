@@ -6,7 +6,7 @@
 /*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:11 by rstride           #+#    #+#             */
-/*   Updated: 2023/08/07 10:41:06 by romaurel         ###   ########.fr       */
+/*   Updated: 2023/08/07 13:34:40 by romaurel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ void Server::handlePrivMsg(std::string command, std::vector<pollfd>::iterator& i
         tokens.push_back(token);
     }
 	if (tokens.size() < 3) {
-		send(it->fd, "\033[0;31mError\033[0m : Not enough arguments\r\n", 43, 0);
+		send(it->fd, "\033[0;31mError\033[0m : Not enough arguments\r\n", 41, 0);
 		return ;
 	}
 	std::string nick = tokens[1];
@@ -38,18 +38,23 @@ void Server::handlePrivMsg(std::string command, std::vector<pollfd>::iterator& i
 		std::map<int, Client>::iterator it2 = _clients.begin();
 		while (it2 != _clients.end()) {
 			if (it2->second.getNickname() == nick) {
-				std::cout << SERVERSPEAK << "Client #" << it1->second.getFd() << " sent private message to " << nick << std::endl;
+				
+				std::cout << SERVERSPEAK << it1->second.getNickname() << " sent private message to " << nick << std::endl;
+				
+				send(it1->second.getFd(), "You sent a private message to ", 31, 0);
+				send(it1->second.getFd(), nick.c_str(), nick.length(), 0);
+				send(it1->second.getFd(), "\r\n", 2, 0);
+
 				send(it2->second.getFd(), "You received a private message from ", 36, 0);
 				send(it2->second.getFd(), it1->second.getNickname().c_str(), it1->second.getNickname().length(), 0);
-				send(it2->second.getFd(), "\r\n", 2, 0);
-				send(it2->second.getFd(), "\033[0;32mSuccess\033[0m : ", 23, 0);
+				send(it2->second.getFd(), " : ", 3, 0);
 				while (tokens.size() > 2) {
 					send(it2->second.getFd(), tokens[2].c_str(), tokens[2].length(), 0);
 					tokens.erase(tokens.begin() + 2);
 					if (tokens.size() > 2)
 						send(it2->second.getFd(), " ", 1, 0);
 				}
-				send(it2->second.getFd(), "\r\n", 2, 0);
+				send(it2->second.getFd(), "\r\n", 5, 0);
 				return ;
 			}
 			it2++;
@@ -94,8 +99,10 @@ void	Server::handleNickCommand(std::string command, std::vector<pollfd>::iterato
 		_clients[it->fd].setNickname(nick);
 		_clients[it->fd].setNicked(true);
 	}
-	else
+	else {
 		std::cout << "Client #" << it->fd << " tried to set nickname to " << nick << std::endl;
+		send(it->fd, "\033[0;31mError\033[0m : Nickname already taken\r\n", 43, 0);
+	}
 }
 
 void	Server::commandExec(std::string inputUser, std::vector<pollfd>::iterator& it) {
