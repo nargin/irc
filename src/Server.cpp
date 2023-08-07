@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
+/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:14 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/05 21:51:35 by robin            ###   ########.fr       */
+/*   Updated: 2023/08/07 07:55:22 by romaurel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,6 +100,7 @@ void Server::newClient(int clientFd, std::vector<pollfd> &pollFd) {
 	pollFd.push_back(clientPollfd);
 	std::cout << SERVERSPEAK << YELLOW << "New client fd #" << clientFd << " connected" << RESET << std::endl;
 
+	welcomeMessage(clientFd);
 	_clients.insert(std::pair<int, Client>(clientFd, new_client));
 }
 

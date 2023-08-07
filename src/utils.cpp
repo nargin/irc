@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
+/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:16 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/04 09:04:28 by robin            ###   ########.fr       */
+/*   Updated: 2023/08/07 08:44:17 by romaurel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Irc.hpp"
+#include "Server.hpp"
 
 /* 
  * Print error message
@@ -20,4 +21,26 @@
 int printError(std::string error) {
 	std::cout << RED << error << RESET << std::endl;
 	return FAILURE;
+}
+
+void Server::welcomeMessage(int fd) {
+	send(fd, "Welcome to the IRC server!\n", 27, 0);
+	send(fd, "Date: ", 6, 0);
+	send(fd, this->getDateTime().c_str(), strlen(this->getDateTime().c_str()), 0);
+	send(fd, "\r\n", 2, 0);
+	
+	int rand = std::rand();
+	if (rand % 5 && rand % 7 == 0) {
+		send(fd, COFFEE, strlen(COFFEE), 0);
+		send(fd, "\033[31mRare Coffee !\033[0m\r\n", 24, 0);
+	}
+	else if (rand % 2 == 0)
+		send(fd, DINO, strlen(DINO), 0);
+	else
+		send(fd, SNAIL, strlen(SNAIL), 0);
+	send(fd, "\r\n", 2, 0);
+	
+	send(fd, "You are not registered yet.\n", 28, 0);
+	send(fd, "Use PASS command to register then\r\n", 35, 0);
+	send(fd, "Use the NICK command to be nicked !\r\n", 38, 0);
 }

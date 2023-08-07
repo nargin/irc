@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
+/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:07 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/05 22:47:30 by robin            ###   ########.fr       */
+/*   Updated: 2023/08/07 08:54:38 by romaurel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,9 @@ class Server {
 		int loopingServer();
 		int setHints(struct addrinfo *hints);
 		void setDateTime(struct tm *time);
+		void welcomeMessage(int fd);
 
+		void handlePrivMsg(std::string command, std::vector<pollfd>::iterator& it);
 		void handlePassCommand(std::string inputUser, std::vector<pollfd>::iterator& iter);
 		void handleNickCommand(std::string command, std::vector<pollfd>::iterator& it);
 
