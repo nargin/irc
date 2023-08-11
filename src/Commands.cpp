@@ -3,16 +3,53 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rstride <rstride@student.42perpignan.fr    +#+  +:+       +#+        */
+/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:11 by rstride           #+#    #+#             */
-/*   Updated: 2023/08/09 20:29:20 by rstride          ###   ########.fr       */
+/*   Updated: 2023/08/11 15:35:16 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 #include "Channel.hpp"
 #include "Commands.hpp"
+
+void Server::botCommand(std::string command, std::vector<pollfd>::iterator &it) {
+	if (command.find("?") == command.npos) {
+		send(it->fd, "Add ? to your question for our bot to answer\r\n", 46, 0);
+		return ;
+	}
+	std::string question = command.substr(5);
+
+	std::cout << SERVERSPEAK << "Client #" << it->fd << " asked : " << question << std::endl;
+	std::vector<std::string> tokens;
+	std::istringstream stream(question);
+	std::string token;
+
+	while (std::getline(stream, token, ' ')) {
+		tokens.push_back(token);
+	}
+	if (tokens.size() == 0) {
+		send(it->fd, "Add ? to your question for our bot to answer\r\n", 46, 0);
+		return ;
+	}
+
+	std::vector<std::string> _botAnswers;
+	_botAnswers.push_back("xerophyte");
+	_botAnswers.push_back("drought");
+	_botAnswers.push_back("sandstorm");
+	_botAnswers.push_back("cosmos");
+	_botAnswers.push_back("exoplanet");
+	_botAnswers.push_back("celestial");
+	
+	std::string answer = _botAnswers[rand() % _botAnswers.size()];
+	std::string word = tokens[rand() % tokens.size()];
+	std::cout << SERVERSPEAK << "Bot answered : " << answer << " " << word << std::endl;
+	if (rand() % 2 == 0)
+		std::swap(answer, word);
+	std::string msg = "The answer to your question is : " + answer + " " + word + "\r\n";
+	send(it->fd, msg.c_str(), msg.length(), 0);
+}
 
 void Server::handlePrivMsg(std::string command, std::vector<pollfd>::iterator& it) {
 	if (_clients[it->fd].getRegistered() == 0 && _clients[it->fd].getNicked() == 1) {
@@ -112,6 +149,9 @@ void	Server::commandExec(std::string inputUser, std::vector<pollfd>::iterator& i
 		handleNickCommand(inputUser, it);
 	else if (inputUser.substr(0, 7) == "PRIVMSG")
 		handlePrivMsg(inputUser, it);
+	else if (inputUser.substr(0, 4) == "/bot")
+		botCommand(inputUser, it);
+	
 }
 
 int	commandCheck(std::string isCommand) {
@@ -122,7 +162,9 @@ int	commandCheck(std::string isCommand) {
 	else if (checkCommand  == "NICK")
 		return 1;
 	else if (checkCommand == "PRIVMSG")
-		return 1;	
+		return 1;
+	else if (checkCommand == "/bot")
+		return 1;
 	return 0;
 }
 

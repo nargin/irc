@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
+/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:07 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/07 08:54:38 by romaurel         ###   ########.fr       */
+/*   Updated: 2023/08/11 15:22:51 by robin            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ class Server {
 		void handlePrivMsg(std::string command, std::vector<pollfd>::iterator& it);
 		void handlePassCommand(std::string inputUser, std::vector<pollfd>::iterator& iter);
 		void handleNickCommand(std::string command, std::vector<pollfd>::iterator& it);
+		void botCommand(std::string command, std::vector<pollfd>::iterator &it);
 
 		/* ~~ Getters ~~ */
 		int getNbUsers();
