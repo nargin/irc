@@ -6,7 +6,7 @@
 /*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:11 by rstride           #+#    #+#             */
-/*   Updated: 2023/08/14 14:39:35 by romaurel         ###   ########.fr       */
+/*   Updated: 2023/08/14 14:48:53 by romaurel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,8 +60,12 @@ void Server::botCommand(std::string command, std::vector<pollfd>::iterator &it) 
 		send(it->fd, time.c_str(), time.length(), 0);
 		send(it->fd, "\r\n", 2, 0);
 	}
+	else if (args == "quoi") {
+		std::string rep = rand() % 2 ? "coubeh\r\n" : "couille\r\n";
+		send(it->fd, rep.c_str(), rep.length(), 0);
+	}
 	else if (args == "help") {
-		send(it->fd, "Available commands : ping, time, help\r\n", 39, 0);
+		send(it->fd, "Available commands : ping, time, quoi, help\r\n", 45, 0);
 	}
 	else
 		send(it->fd, "\033[0;31mError\033[0m : Command not found\r\n", 40, 0);
@@ -107,7 +111,7 @@ void Server::handlePrivMsg(std::string command, std::vector<pollfd>::iterator& i
 					if (tokens.size() > 2)
 						send(it2->second.getFd(), " ", 1, 0);
 				}
-				send(it2->second.getFd(), "\r\n", 5, 0);
+				send(it2->second.getFd(), "\r\n", 2, 0);
 				return ;
 			}
 			it2++;
