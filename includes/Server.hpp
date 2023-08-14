@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
+/*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:07 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/14 14:24:14 by romaurel         ###   ########.fr       */
+/*   Updated: 2023/08/14 15:47:36 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ class Server {
 		int launchServer();
 		int receiveData(std::vector <pollfd>& fds, std::vector <pollfd>::iterator& iter);
 		int pollerrEvent(std::vector <pollfd>& fds, std::vector <pollfd>::iterator& iter);
-		
+
 		int acceptClient(std::vector <pollfd>& fds, std::vector <pollfd>& tempNewFds);
 		void newClient(int client_fd, std::vector <pollfd>& tempNewFds);
 		void deleteClient(std::vector <pollfd>& fds, std::vector <pollfd>::iterator& iter);
@@ -55,6 +55,8 @@ class Server {
 		void handleNickCommand(std::string command, std::vector<pollfd>::iterator& it);
 		void quitClient(std::vector<pollfd>::iterator &it);
 		void botCommand(std::string command, std::vector<pollfd>::iterator &it);
+		void handleCreateCommand(std::string command, std::vector<pollfd>::iterator &it);
+		void handleJoinCommand(std::string command, std::vector<pollfd>::iterator &it);
 
 		/* ~~ Getters ~~ */
 		int getNbUsers();

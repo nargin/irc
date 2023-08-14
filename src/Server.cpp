@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
+/*   By: maurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:14 by romaurel          #+#    #+#             */
 /*   Updated: 2023/08/07 07:55:22 by romaurel         ###   ########.fr       */
@@ -16,10 +16,10 @@ Server::Server(int port, std::string password) : _port(port), _nbUsers(0), _pass
 	std::cout << SERVERSPEAK << GREEN << "Server starting..." << RESET << std::endl;
 	std::cout << SERVERSPEAK << YELLOW << "IRC server launched on port " << this->_port << RESET << std::endl;
 	std::cout << SERVERSPEAK << YELLOW << "Password: " << this->_pass << RESET << std::endl;
-	
+
 	/* Set hints to 0 */
 	bzero(&this->_hints, sizeof(this->_hints));
-	
+
 	/* Get current time */
 	time_t rawtime;
 	(time(&rawtime), this->_time = localtime(&rawtime));
@@ -38,7 +38,7 @@ void Server::setDateTime(struct tm* time) {
     this->_datetime = formattedTime;
 }
 
-/* 
+/*
  * Set hints for getaddrinfo()
  * @param hints: struct addrinfo *
  * @return: int (0 on success, 1 on failure)
@@ -55,7 +55,7 @@ int Server::setHints(struct addrinfo *hints) {
 	return SUCCESS;
 }
 
-/* 
+/*
  * Launch server
  * @return: int (0 on success, 1 on failure)
  */
@@ -77,7 +77,7 @@ int Server::launchServer() {
 	/*  >> Bind socket << */
 	if (bind(this->_sockfd, _servinfo->ai_addr, _servinfo->ai_addrlen) == FAILURE)
 		return printError(SERVERSPEAK RED "Error on binding" RESET);
-	
+
 	/* >> Listen << */
 	if (listen(this->_sockfd, 10) == FAILURE)
 		return printError(SERVERSPEAK RED "Error on listening" RESET);
@@ -123,7 +123,7 @@ int Server::acceptClient(std::vector<pollfd>& fds, std::vector<pollfd>& tempNewF
 
 int Server::receiveData(std::vector<pollfd>& fds, std::vector<pollfd>::iterator& iter) {
 	// Clients client;
-	
+
 	char buffer[512];
 	int n = 0;
 
@@ -147,6 +147,13 @@ int Server::receiveData(std::vector<pollfd>& fds, std::vector<pollfd>::iterator&
 
 void Server::deleteClient(std::vector<pollfd>& fds, std::vector<pollfd>::iterator& iter) {
 	std::cout << SERVERSPEAK << YELLOW << "Client fd #" << iter->fd << " disconnected" << RESET << std::endl;
+	for (std::map<std::string, Channel>::iterator it_channel = _channels.begin(); it_channel != _channels.end(); it_channel++)
+	{
+		it_channel->second.remove_operator(_clients[iter->fd]);
+		it_channel->second.remove_user(_clients[iter->fd]);
+		if (it_channel->second.get_users().size() == 0)
+			_channels.erase(it_channel);
+	}
 	close(iter->fd);
 	fds.erase(iter);
 	this->_clients.erase(iter->fd);
@@ -184,11 +191,11 @@ int Server::loopingServer(void) {
 		}
 
 		std::vector<pollfd>::iterator iter = fds.begin();
-		
+
 		while (iter != fds.end()) {
 
 			if (iter->revents & POLLIN) {
-			
+
 				/* New client or data received */
 				if (iter->fd == _sockfd) {
 					if (this->acceptClient(fds, tempNewFds) == CONTINUE)
@@ -197,12 +204,12 @@ int Server::loopingServer(void) {
 				else
 					if (this->receiveData(fds, iter) == BREAK)
 						break;
-			
+
 			}
 			else if (iter->revents & POLLOUT) {
 				/* Data to send */
 				// if (this->sendData(fds, iter) == BREAK)
-				// 	break;	
+				// 	break;
 			}
 			else if (iter->revents & POLLERR) {
 				if (this->pollerrEvent(fds, iter) == BREAK)

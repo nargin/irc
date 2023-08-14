@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
+/*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:16 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/07 08:44:17 by romaurel         ###   ########.fr       */
+/*   Updated: 2023/08/14 16:24:29 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Irc.hpp"
 #include "Server.hpp"
 
-/* 
+/*
  * Print error message
  * @param error: std::string
  * @return: int (FAILURE) -1
@@ -28,7 +28,7 @@ void Server::welcomeMessage(int fd) {
 	send(fd, "Date: ", 6, 0);
 	send(fd, this->getDateTime().c_str(), strlen(this->getDateTime().c_str()), 0);
 	send(fd, "\r\n", 2, 0);
-	
+
 	int rand = std::rand();
 	if (rand % 5 && rand % 7 == 0) {
 		send(fd, COFFEE, strlen(COFFEE), 0);
@@ -39,8 +39,12 @@ void Server::welcomeMessage(int fd) {
 	else
 		send(fd, SNAIL, strlen(SNAIL), 0);
 	send(fd, "\r\n", 2, 0);
-	
+
 	send(fd, "You are not registered yet.\n", 28, 0);
 	send(fd, "Use PASS command to register then\r\n", 35, 0);
 	send(fd, "Use the NICK command to be nicked !\r\n", 38, 0);
+}
+
+void sen(int fd, std::string msg) {
+	send(fd, msg.c_str(), strlen(msg.c_str()), 0);
 }

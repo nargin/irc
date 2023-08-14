@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Irc.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
+/*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:04 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/05 23:46:24 by robin            ###   ########.fr       */
+/*   Updated: 2023/08/14 16:25:22 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,5 +40,5 @@
 
 int	printError(std::string error);
 void setDatetime(struct tm *time);
+void sen(int fd, std::string msg);
 
- 

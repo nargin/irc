@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
+/*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:41:59 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/05 23:48:26 by robin            ###   ########.fr       */
+/*   Updated: 2023/08/14 15:56:27 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,6 @@ class Client {
 
 		bool operator==(const Client& other) const { return this->_fd == other._fd;	}
 
-	
+
 };
 
- 

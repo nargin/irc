@@ -6,7 +6,7 @@
 /*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:11 by rstride           #+#    #+#             */
-/*   Updated: 2023/08/14 15:28:40 by maserrie         ###   ########.fr       */
+/*   Updated: 2023/08/14 18:55:29 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,13 @@ namespace patch
 void Server::quitClient(std::vector<pollfd>::iterator &it) {
 	std::cout << SERVERSPEAK << "Client #" << it->fd << " disconnected with quit command" << std::endl;
 	send(it->fd, "You have been disconnected\r\n", 28, 0);
+	for (std::map<std::string, Channel>::iterator it_channel = _channels.begin(); it_channel != _channels.end(); it_channel++)
+	{
+		it_channel->second.remove_operator(_clients[it->fd]);
+		it_channel->second.remove_user(_clients[it->fd]);
+		if (it_channel->second.get_users().size() == 0)
+			_channels.erase(it_channel);
+	}
 	close(it->fd);
 	_clients.erase(it->fd);
 }
@@ -162,6 +169,82 @@ void	Server::handleNickCommand(std::string command, std::vector<pollfd>::iterato
 	}
 }
 
+void	Server::handleCreateCommand(std::string command, std::vector<pollfd>::iterator &it)
+{
+	if (_clients[it->fd].getRegistered() == 0) {
+		send(it->fd, "\033[0;31mError\033[0m : You have to be registered to create a channel\r\n", 72, 0);
+		return ;
+	}
+	if (_clients[it->fd].getNicked() == 0) {
+		send(it->fd, "\033[0;31mError\033[0m : You have to be nicked to create a channel\r\n", 68, 0);
+		return ;
+	}
+	std::vector <std::string> tokens;
+	std::istringstream stream(command);
+	std::string token;
+
+	while (std::getline(stream, token, ' ')) {
+		tokens.push_back(token);
+	}
+	if (tokens.size() != 3)
+	{
+		send(it->fd, "\033[0;31mError\033[0m : create [channel name] [topic]\r\n", 51, 0);
+		return ;
+	}
+	for (std::map<std::string, Channel>::iterator it_channel = _channels.begin(); it_channel != _channels.end(); it_channel++)
+	{
+		if (it_channel->first == tokens[2])
+		{
+			send(it->fd, "\033[0;31mError\033[0m : Channel already exists\r\n", 43, 0);
+			return ;
+		}
+	}
+	Channel newChannel(tokens[2], tokens[3]);
+	newChannel.add_user(_clients[it->fd]);
+	newChannel.add_operator(_clients[it->fd]);
+	_channels.insert(std::pair<std::string, Channel>(tokens[2], newChannel));
+	sen(it->fd, "\033[0;32mSuccess\033[0m : Channel created\r\n");
+}
+
+void	Server::handleJoinCommand(std::string command, std::vector<pollfd>::iterator &it)
+{
+	if (_clients[it->fd].getRegistered() == 0) {
+		send(it->fd, "\033[0;31mError\033[0m : You have to be registered to join a channel\r\n", 70, 0);
+		return ;
+	}
+	if (_clients[it->fd].getNicked() == 0) {
+		send(it->fd, "\033[0;31mError\033[0m : You have to be nicked to join a channel\r\n", 66, 0);
+		return ;
+	}
+	std::vector <std::string> tokens;
+	std::istringstream stream(command);
+	std::string token;
+
+	while (std::getline(stream, token, ' ')) {
+		tokens.push_back(token);
+	}
+	if (tokens.size() != 2)
+	{
+		send(it->fd, "\033[0;31mError\033[0m : join [channel name]\r\n", 41, 0);
+		return ;
+	}
+	for (std::map<std::string, Channel>::iterator it_channel = _channels.begin(); it_channel != _channels.end(); it_channel++)
+	{
+		if (it_channel->first == tokens[1])
+		{
+			if (it_channel->second.get_invite_only() == true)
+			{
+				send(it->fd, "\033[0;31mError\033[0m : Channel is invite only\r\n", 43, 0);
+				return ;
+			}
+			it_channel->second.add_user(_clients[it->fd]);
+			send(it->fd, "\033[0;32mSuccess\033[0m : You joined the channel\r\n", 45, 0);
+			return ;
+		}
+	}
+	send(it->fd, "\033[0;31mError\033[0m : Channel not found\r\n", 38, 0);
+}
+
 int	Server::commandExec(std::string inputUser, std::vector<pollfd>::iterator& it) {
 	std::string checkCommand = inputUser.substr(0, inputUser.find(" "));
 	std::transform(checkCommand.begin(), checkCommand.end(), checkCommand.begin(), ::toupper);
@@ -172,8 +255,12 @@ int	Server::commandExec(std::string inputUser, std::vector<pollfd>::iterator& it
 		handleNickCommand(inputUser, it);
 	else if (checkCommand == "PRIVMSG")
 		handlePrivMsg(inputUser, it);
-	else if (checkCommand == "QUIT")
+	else if (checkCommand == "QUIT" || checkCommand == "EXIT")
 		quitClient(it);
+	else if (checkCommand == "CREATE")
+		handleCreateCommand(inputUser, it);
+	else if (checkCommand == "JOIN")
+		handleJoinCommand(inputUser, it);
 	else if (checkCommand == "/BOT")
 		botCommand(inputUser, it);
 	else

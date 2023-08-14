@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
+/*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:09 by rstride           #+#    #+#             */
-/*   Updated: 2023/08/04 08:55:37 by robin            ###   ########.fr       */
+/*   Updated: 2023/08/14 18:30:41 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,10 +33,43 @@ bool Channel::remove_user(Client& user) {
 	return false;
 }
 
+bool Channel::remove_operator(Client& client) {
+	std::vector<Client>::iterator it = std::find(_operators.begin(), _operators.end(), client);
+	if (it != _operators.end()) {
+		_operators.erase(it);
+		return true;
+	}
+	return false;
+}
+
 bool Channel::add_user(Client& user) {
 	if (std::find(_clients.begin(), _clients.end(), user) == _clients.end()) {
 		_clients.push_back(user);
 		return true;
 	}
 	return false;
+}
+
+std::string Channel::getname() const {
+	return _name;
+}
+
+std::string Channel::gettopic() const {
+	return _topic;
+}
+
+bool Channel::is_user(const Client& client) const {
+	for (std::vector<Client>::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
+		if (*it == client)
+			return true;
+	}
+	return false;
+}
+
+std::vector<Client> Channel::get_users() const {
+	return _clients;
+}
+
+bool	Channel::get_invite_only() const {
+	return _invite_only;
 }
