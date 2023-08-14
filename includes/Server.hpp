@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
+/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:07 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/11 15:22:51 by robin            ###   ########.fr       */
+/*   Updated: 2023/08/14 14:24:14 by romaurel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ class Server {
 		void deleteClient(std::vector <pollfd>& fds, std::vector <pollfd>::iterator& iter);
 
 		void parseInput(std::string inputUser, std::vector<pollfd>::iterator& iter);
-		void commandExec(std::string inputUser, std::vector<pollfd>::iterator& it);
+		int commandExec(std::string inputUser, std::vector<pollfd>::iterator& it);
 		int loopingServer();
 		int setHints(struct addrinfo *hints);
 		void setDateTime(struct tm *time);
@@ -53,6 +53,7 @@ class Server {
 		void handlePrivMsg(std::string command, std::vector<pollfd>::iterator& it);
 		void handlePassCommand(std::string inputUser, std::vector<pollfd>::iterator& iter);
 		void handleNickCommand(std::string command, std::vector<pollfd>::iterator& it);
+		void quitClient(std::vector<pollfd>::iterator &it);
 		void botCommand(std::string command, std::vector<pollfd>::iterator &it);
 
 		/* ~~ Getters ~~ */

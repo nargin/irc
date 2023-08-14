@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: robin <robin@student.42.fr>                +#+  +:+       +#+        */
+/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:11 by rstride           #+#    #+#             */
-/*   Updated: 2023/08/11 15:35:16 by robin            ###   ########.fr       */
+/*   Updated: 2023/08/14 14:33:41 by romaurel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,41 +14,54 @@
 #include "Channel.hpp"
 #include "Commands.hpp"
 
-void Server::botCommand(std::string command, std::vector<pollfd>::iterator &it) {
-	if (command.find("?") == command.npos) {
-		send(it->fd, "Add ? to your question for our bot to answer\r\n", 46, 0);
-		return ;
-	}
-	std::string question = command.substr(5);
+namespace patch
+{
+    template < typename T > std::string to_string( const T& n )
+    {
+        std::ostringstream stm ;
+        stm << n ;
+        return stm.str() ;
+    }
+}
 
-	std::cout << SERVERSPEAK << "Client #" << it->fd << " asked : " << question << std::endl;
+void Server::quitClient(std::vector<pollfd>::iterator &it) {
+	std::cout << SERVERSPEAK << "Client #" << it->fd << " disconnected with quit command" << std::endl;
+	send(it->fd, "You have been disconnected\r\n", 28, 0);
+	close(it->fd);
+	_clients.erase(it->fd);
+}
+
+void Server::botCommand(std::string command, std::vector<pollfd>::iterator &it) {
 	std::vector<std::string> tokens;
-	std::istringstream stream(question);
+	std::istringstream stream(command);
 	std::string token;
 
-	while (std::getline(stream, token, ' ')) {
+	char delimiter = ' ';
+	while (std::getline(stream, token, delimiter)) {
 		tokens.push_back(token);
 	}
-	if (tokens.size() == 0) {
-		send(it->fd, "Add ? to your question for our bot to answer\r\n", 46, 0);
+	if (tokens.size() < 2) {
+		send(it->fd, "\033[0;31mError\033[0m : Not enough arguments\r\n", 41, 0);
 		return ;
 	}
+	std::string cmd = tokens[0];
+	std::string args = tokens[1];
+	std::cout << SERVERSPEAK << "Client #" << it->fd << " used bot command " << cmd << " " << args << std::endl;
 
-	std::vector<std::string> _botAnswers;
-	_botAnswers.push_back("xerophyte");
-	_botAnswers.push_back("drought");
-	_botAnswers.push_back("sandstorm");
-	_botAnswers.push_back("cosmos");
-	_botAnswers.push_back("exoplanet");
-	_botAnswers.push_back("celestial");
-	
-	std::string answer = _botAnswers[rand() % _botAnswers.size()];
-	std::string word = tokens[rand() % tokens.size()];
-	std::cout << SERVERSPEAK << "Bot answered : " << answer << " " << word << std::endl;
-	if (rand() % 2 == 0)
-		std::swap(answer, word);
-	std::string msg = "The answer to your question is : " + answer + " " + word + "\r\n";
-	send(it->fd, msg.c_str(), msg.length(), 0);
+	if (args == "ping") {
+		std::string pong = "Ping : " + patch::to_string(rand() % 250 + 1) + "\r\n";
+		send(it->fd, pong.c_str(), pong.length(), 0);
+	}
+	else if (args == "time") {
+		std::string time = _datetime.substr(0, _datetime.find("\n"));
+		send(it->fd, time.c_str(), time.length(), 0);
+		send(it->fd, "\r\n", 2, 0);
+	}
+	else if (args == "help") {
+		send(it->fd, "Available commands : ping, time, help\r\n", 39, 0);
+	}
+	else
+		send(it->fd, "\033[0;31mError\033[0m : Command not found\r\n", 40, 0);
 }
 
 void Server::handlePrivMsg(std::string command, std::vector<pollfd>::iterator& it) {
@@ -142,35 +155,29 @@ void	Server::handleNickCommand(std::string command, std::vector<pollfd>::iterato
 	}
 }
 
-void	Server::commandExec(std::string inputUser, std::vector<pollfd>::iterator& it) {
-	if (inputUser.substr(0, 4) == "PASS" && inputUser.length() > 5 && _clients.find(it->fd) != _clients.end())
+int	Server::commandExec(std::string inputUser, std::vector<pollfd>::iterator& it) {
+	std::string checkCommand = inputUser.substr(0, inputUser.find(" "));
+	std::transform(checkCommand.begin(), checkCommand.end(), checkCommand.begin(), ::toupper);
+	
+	if (checkCommand == "PASS" && inputUser.length() > 5 && _clients.find(it->fd) != _clients.end())
 		handlePassCommand(inputUser, it);
-	else if (inputUser.substr(0, 4) == "NICK")
+	else if (checkCommand == "NICK")
 		handleNickCommand(inputUser, it);
-	else if (inputUser.substr(0, 7) == "PRIVMSG")
+	else if (checkCommand == "PRIVMSG")
 		handlePrivMsg(inputUser, it);
-	else if (inputUser.substr(0, 4) == "/bot")
+	else if (checkCommand == "QUIT")
+		quitClient(it);
+	else if (checkCommand == "/BOT")
 		botCommand(inputUser, it);
+	else
+		return 0;
+	return 1;
 	
 }
 
-int	commandCheck(std::string isCommand) {
-	std::string checkCommand = isCommand.substr(0, isCommand.find(" "));
-
-	if (checkCommand == "PASS")
-		return 1;
-	else if (checkCommand  == "NICK")
-		return 1;
-	else if (checkCommand == "PRIVMSG")
-		return 1;
-	else if (checkCommand == "/bot")
-		return 1;
-	return 0;
-}
-
 void Server::parseInput(std::string inputUser, std::vector<pollfd>::iterator& iter) {
-	if (commandCheck(inputUser))
-		commandExec(inputUser, iter);
+	if (commandExec(inputUser, iter))
+		return ;
 	else if (_clients.find(iter->fd) != _clients.end() && _clients[iter->fd].getRegistered() == 0 && _clients[iter->fd].getNicked() == 0) {
 		send(iter->fd, "\033[0;31mError\033[0m : You have to be registered to send messages\r\n", 64, 0);
 	}
