@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: robin <robin@student.42.fr>                +#+  +:+       +#+         #
+#    By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/08/03 03:42:17 by romaurel          #+#    #+#              #
-#    Updated: 2023/08/04 09:36:38 by robin            ###   ########.fr        #
+#    Updated: 2023/08/14 14:36:44 by romaurel         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -69,4 +69,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re run bonus
+.PHONY: all clean fclean re run lrun nc

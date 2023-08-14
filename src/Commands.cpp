@@ -6,7 +6,7 @@
 /*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:11 by rstride           #+#    #+#             */
-/*   Updated: 2023/08/14 14:33:41 by romaurel         ###   ########.fr       */
+/*   Updated: 2023/08/14 14:39:35 by romaurel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,13 +35,16 @@ void Server::botCommand(std::string command, std::vector<pollfd>::iterator &it) 
 	std::vector<std::string> tokens;
 	std::istringstream stream(command);
 	std::string token;
-
 	char delimiter = ' ';
+
 	while (std::getline(stream, token, delimiter)) {
 		tokens.push_back(token);
 	}
 	if (tokens.size() < 2) {
 		send(it->fd, "\033[0;31mError\033[0m : Not enough arguments\r\n", 41, 0);
+		return ;
+	} else if (tokens.size() > 2) {
+		send(it->fd, "\033[0;31mError\033[0m : Too many arguments\r\n", 39, 0);
 		return ;
 	}
 	std::string cmd = tokens[0];
