@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+         #
+#    By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/08/03 03:42:17 by romaurel          #+#    #+#              #
-#    Updated: 2023/08/14 14:36:44 by romaurel         ###   ########.fr        #
+#    Updated: 2023/08/14 15:12:37 by maserrie         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -57,7 +57,7 @@ lrun :
 	@valgrind -q -s ./$(NAME) 6667 hihi
 
 nc :
-	@nc -v localhost 6667
+	@nc 127.0.0.1 6667
 
 clean:
 	@echo "$(RED)Removing objects 💣$(EOC)"

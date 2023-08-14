@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
+/*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:11 by rstride           #+#    #+#             */
-/*   Updated: 2023/08/14 14:48:53 by romaurel         ###   ########.fr       */
+/*   Updated: 2023/08/14 15:28:40 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ void Server::handlePrivMsg(std::string command, std::vector<pollfd>::iterator& i
     std::istringstream stream(command);
     std::string token;
 	char delimiter = ' ';
-    
+
     while (std::getline(stream, token, delimiter)) {
         tokens.push_back(token);
     }
@@ -95,9 +95,9 @@ void Server::handlePrivMsg(std::string command, std::vector<pollfd>::iterator& i
 		std::map<int, Client>::iterator it2 = _clients.begin();
 		while (it2 != _clients.end()) {
 			if (it2->second.getNickname() == nick) {
-				
+
 				std::cout << SERVERSPEAK << it1->second.getNickname() << " sent private message to " << nick << std::endl;
-				
+
 				send(it1->second.getFd(), "You sent a private message to ", 31, 0);
 				send(it1->second.getFd(), nick.c_str(), nick.length(), 0);
 				send(it1->second.getFd(), "\r\n", 2, 0);
@@ -120,7 +120,7 @@ void Server::handlePrivMsg(std::string command, std::vector<pollfd>::iterator& i
 	}
 	else
 		send(it1->second.getFd(), "\033[0;31mError\033[0m : You have to be registered/nicked to send private message\r\n", 78, 0);
-	
+
 }
 
 void Server::handlePassCommand(std::string command, std::vector<pollfd>::iterator& iter) {
@@ -136,7 +136,7 @@ void Server::handlePassCommand(std::string command, std::vector<pollfd>::iterato
 		std::cout << "Client #" << iter->fd << " tried password " << pass << std::endl;
 		send(iter->fd, "\033[0;31mError\033[0m : Wrong password\r\n", 40, 0);
 	}
-		
+
 }
 
 void	Server::handleNickCommand(std::string command, std::vector<pollfd>::iterator& it) {
@@ -165,10 +165,10 @@ void	Server::handleNickCommand(std::string command, std::vector<pollfd>::iterato
 int	Server::commandExec(std::string inputUser, std::vector<pollfd>::iterator& it) {
 	std::string checkCommand = inputUser.substr(0, inputUser.find(" "));
 	std::transform(checkCommand.begin(), checkCommand.end(), checkCommand.begin(), ::toupper);
-	
+
 	if (checkCommand == "PASS" && inputUser.length() > 5 && _clients.find(it->fd) != _clients.end())
 		handlePassCommand(inputUser, it);
-	else if (checkCommand == "NICK")
+	else if (checkCommand == "NICK" && inputUser.length() > 5)
 		handleNickCommand(inputUser, it);
 	else if (checkCommand == "PRIVMSG")
 		handlePrivMsg(inputUser, it);
@@ -179,7 +179,7 @@ int	Server::commandExec(std::string inputUser, std::vector<pollfd>::iterator& it
 	else
 		return 0;
 	return 1;
-	
+
 }
 
 void Server::parseInput(std::string inputUser, std::vector<pollfd>::iterator& iter) {
