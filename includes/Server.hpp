@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:07 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/14 15:47:36 by maserrie         ###   ########.fr       */
+/*   Updated: 2023/08/15 13:11:38 by romaurel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ class Server {
 		void setDateTime(struct tm *time);
 		void welcomeMessage(int fd);
 
+		void handleListCommand(std::vector<pollfd>::iterator &it);
 		void handlePrivMsg(std::string command, std::vector<pollfd>::iterator& it);
 		void handlePassCommand(std::string inputUser, std::vector<pollfd>::iterator& iter);
 		void handleNickCommand(std::string command, std::vector<pollfd>::iterator& it);

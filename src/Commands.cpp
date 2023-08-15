@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:11 by rstride           #+#    #+#             */
-/*   Updated: 2023/08/14 18:55:29 by maserrie         ###   ########.fr       */
+/*   Updated: 2023/08/15 14:06:59 by romaurel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,10 +169,31 @@ void	Server::handleNickCommand(std::string command, std::vector<pollfd>::iterato
 	}
 }
 
+void Server::handleListCommand(std::vector<pollfd>::iterator &it) {
+	if (_clients[it->fd].getRegistered() == 0) {
+		send(it->fd, "\033[0;31mError\033[0m : You have to be registered to list channels\r\n", 66, 0);
+		return ;
+	}
+	if (_clients[it->fd].getNicked() == 0) {
+		send(it->fd, "\033[0;31mError\033[0m : You have to be nicked to list channels\r\n", 62, 0);
+		return ;
+	}
+	if (_channels.size() == 0) {
+		send(it->fd, "No channel available\r\n", 22, 0);
+		return ;
+	}
+
+	std::string list = "List of channels :\r\n";
+	for (std::map<std::string, Channel>::iterator it_channel = _channels.begin(); it_channel != _channels.end(); it_channel++)
+		list += it_channel->first + " : " + it_channel->second.gettopic() + "\r\n";
+
+	send(it->fd, list.c_str(), list.length(), 0);
+}
+
 void	Server::handleCreateCommand(std::string command, std::vector<pollfd>::iterator &it)
 {
 	if (_clients[it->fd].getRegistered() == 0) {
-		send(it->fd, "\033[0;31mError\033[0m : You have to be registered to create a channel\r\n", 72, 0);
+		send(it->fd, "\033[0;31mError\033[0m : You have to be registered to create a channel\r\n", 68, 0);
 		return ;
 	}
 	if (_clients[it->fd].getNicked() == 0) {
@@ -182,28 +203,27 @@ void	Server::handleCreateCommand(std::string command, std::vector<pollfd>::itera
 	std::vector <std::string> tokens;
 	std::istringstream stream(command);
 	std::string token;
-
+	
 	while (std::getline(stream, token, ' ')) {
 		tokens.push_back(token);
 	}
 	if (tokens.size() != 3)
 	{
-		send(it->fd, "\033[0;31mError\033[0m : create [channel name] [topic]\r\n", 51, 0);
+		send(it->fd, "\033[0;31mError\033[0m : create [channel name] [topic]\r\n", 50, 0);
 		return ;
 	}
 	for (std::map<std::string, Channel>::iterator it_channel = _channels.begin(); it_channel != _channels.end(); it_channel++)
 	{
-		if (it_channel->first == tokens[2])
+		if (it_channel->first == tokens[1])
 		{
 			send(it->fd, "\033[0;31mError\033[0m : Channel already exists\r\n", 43, 0);
 			return ;
 		}
 	}
-	Channel newChannel(tokens[2], tokens[3]);
-	newChannel.add_user(_clients[it->fd]);
-	newChannel.add_operator(_clients[it->fd]);
-	_channels.insert(std::pair<std::string, Channel>(tokens[2], newChannel));
-	sen(it->fd, "\033[0;32mSuccess\033[0m : Channel created\r\n");
+	Channel new_channel(tokens[1], tokens[2]);
+	new_channel.add_user(_clients[it->fd]);
+	_channels.insert(std::pair<std::string, Channel>(tokens[1], new_channel));	
+	send(it->fd, "\033[0;32mSuccess\033[0m : You created the channel\r\n", 45, 0);
 }
 
 void	Server::handleJoinCommand(std::string command, std::vector<pollfd>::iterator &it)
@@ -223,7 +243,7 @@ void	Server::handleJoinCommand(std::string command, std::vector<pollfd>::iterato
 	while (std::getline(stream, token, ' ')) {
 		tokens.push_back(token);
 	}
-	if (tokens.size() != 2)
+	if (tokens.size() != 3)
 	{
 		send(it->fd, "\033[0;31mError\033[0m : join [channel name]\r\n", 41, 0);
 		return ;
@@ -232,8 +252,7 @@ void	Server::handleJoinCommand(std::string command, std::vector<pollfd>::iterato
 	{
 		if (it_channel->first == tokens[1])
 		{
-			if (it_channel->second.get_invite_only() == true)
-			{
+			if (it_channel->second.get_invite_only() == true) {
 				send(it->fd, "\033[0;31mError\033[0m : Channel is invite only\r\n", 43, 0);
 				return ;
 			}
@@ -261,6 +280,8 @@ int	Server::commandExec(std::string inputUser, std::vector<pollfd>::iterator& it
 		handleCreateCommand(inputUser, it);
 	else if (checkCommand == "JOIN")
 		handleJoinCommand(inputUser, it);
+	else if (checkCommand == "LIST")
+		handleListCommand(it);
 	else if (checkCommand == "/BOT")
 		botCommand(inputUser, it);
 	else
