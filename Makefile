@@ -6,7 +6,7 @@
 #    By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/08/03 03:42:17 by romaurel          #+#    #+#              #
-#    Updated: 2023/08/14 15:12:37 by maserrie         ###   ########.fr        #
+#    Updated: 2023/08/15 18:06:18 by maserrie         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,7 +26,7 @@ SRCS	:=	main \
 
 OBJS	:=	$(foreach src,$(SRCS),$(OBJECTS)/$(src).o)
 
-FLAGS	:=	-Wall -Wextra -Werror -std=c++98 -I includes
+FLAGS	:=	-Wall -Wextra -Werror -g -std=c++98 -I includes
 
 BLACK	:=	\033[30m
 WHITE	:=	\033[37m

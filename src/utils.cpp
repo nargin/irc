@@ -6,7 +6,7 @@
 /*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:16 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/14 16:24:29 by maserrie         ###   ########.fr       */
+/*   Updated: 2023/08/15 19:07:02 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ void Server::welcomeMessage(int fd) {
 	send(fd, "\r\n", 2, 0);
 
 	int rand = std::rand();
-	if (rand % 5 && rand % 7 == 0) {
+	if (rand % 5 == 0 && rand % 7 == 0) {
 		send(fd, COFFEE, strlen(COFFEE), 0);
 		send(fd, "\033[31mRare Coffee !\033[0m\r\n", 24, 0);
 	}

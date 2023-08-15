@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
+/*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:41:55 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/15 13:38:03 by romaurel         ###   ########.fr       */
+/*   Updated: 2023/08/15 17:53:26 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,8 @@ class Channel {
 		bool _invite_only;
 
 	public:
-		Channel(const std::string& name, const std::string &topic) : _name(name), _topic(topic), _invite_only(false) {}
-		~Channel() { std::cout << "Channel " << _name << " destroyed" << std::endl; }
+		Channel(const std::string& name, const std::string &topic);
+		~Channel();
 
 		bool is_operator(const Client& client) const;
 		bool add_operator(Client& client);

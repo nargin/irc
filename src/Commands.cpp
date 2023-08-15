@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
+/*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:11 by rstride           #+#    #+#             */
-/*   Updated: 2023/08/15 14:06:59 by romaurel         ###   ########.fr       */
+/*   Updated: 2023/08/15 18:00:46 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -203,7 +203,7 @@ void	Server::handleCreateCommand(std::string command, std::vector<pollfd>::itera
 	std::vector <std::string> tokens;
 	std::istringstream stream(command);
 	std::string token;
-	
+
 	while (std::getline(stream, token, ' ')) {
 		tokens.push_back(token);
 	}
@@ -221,9 +221,9 @@ void	Server::handleCreateCommand(std::string command, std::vector<pollfd>::itera
 		}
 	}
 	Channel new_channel(tokens[1], tokens[2]);
-	new_channel.add_user(_clients[it->fd]);
-	_channels.insert(std::pair<std::string, Channel>(tokens[1], new_channel));	
-	send(it->fd, "\033[0;32mSuccess\033[0m : You created the channel\r\n", 45, 0);
+	_channels.insert(std::pair<std::string, Channel>(tokens[1], new_channel));
+	send(it->fd, "\033[0;32mSuccess\033[0m : You created the channel\r\n", 47, 0);
+	std::cout << SERVERSPEAK << "Client #" << it->fd << " created channel " << tokens[1] << " which talk about " << tokens[2] << std::endl;
 }
 
 void	Server::handleJoinCommand(std::string command, std::vector<pollfd>::iterator &it)
