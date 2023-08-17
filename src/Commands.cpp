@@ -6,7 +6,7 @@
 /*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:11 by rstride           #+#    #+#             */
-/*   Updated: 2023/08/17 20:14:50 by maserrie         ###   ########.fr       */
+/*   Updated: 2023/08/17 21:38:09 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -261,7 +261,7 @@ void Server::handleInviteCommand(std::string command, std::vector<pollfd>::itera
 	}
 	if (tokens.size() != 3)
 	{
-		sen(it->fd, "\033[0;31mError\033[0m : invite [channel name] [nickname]\r\n");
+		send_msg(it->fd, "\033[0;31mError\033[0m : invite [channel name] [nickname]\r\n");
 		return ;
 	}
 	std::map<int, Client>::iterator it1 = _clients.begin();
@@ -284,17 +284,17 @@ void Server::handleInviteCommand(std::string command, std::vector<pollfd>::itera
 	Channel &channel = it2->second;
 	if (channel.is_user(_clients[it->fd]) == false)
 	{
-		sen(it->fd, "\033[0;31mError\033[0m : You are not in this channel\r\n");
+		send_msg(it->fd, "\033[0;31mError\033[0m : You are not in this channel\r\n");
 		return ;
 	}
 	if (channel.is_operator(_clients[it->fd]) == false)
 	{
-		sen(it->fd, "\033[0;31mError\033[0m : You are not operator of this channel\r\n");
+		send_msg(it->fd, "\033[0;31mError\033[0m : You are not operator of this channel\r\n");
 		return ;
 	}
 	channel.add_invite(_clients[it1->first]);
-	sen(it->fd, "\033[0;32mSuccess\033[0m : You invited ", tokens[2].c_str(), " to ", tokens[1].c_str(), "\r\n", "END");
-	sen(it1->first, "\033[0;32mSuccess\033[0m : You have been invited to ", tokens[1].c_str(), "\r\n", "END");
+	send_list(it->fd, "\033[0;32mSuccess\033[0m : You invited ", tokens[2].c_str(), " to ", tokens[1].c_str(), "\r\n", "END");
+	send_list(it1->first, "\033[0;32mSuccess\033[0m : You have been invited to ", tokens[1].c_str(), "\r\n", "END");
 	std::cout << SERVERSPEAK << "Client #" << it->fd << " invited " << tokens[2] << " to channel " << tokens[1] << std::endl;
 }
 
@@ -309,7 +309,7 @@ void Server::handleKickCommand(std::string command, std::vector<pollfd>::iterato
 	}
 	if (tokens.size() != 2)
 	{
-		sen(it->fd, "\033[0;31mError\033[0m : kick [nickname]\r\n");
+		send_msg(it->fd, "\033[0;31mError\033[0m : kick [nickname]\r\n");
 		return ;
 	}
 	std::map<int, Client>::iterator it1 = _clients.find(it->fd);
@@ -321,16 +321,16 @@ void Server::handleKickCommand(std::string command, std::vector<pollfd>::iterato
 	Channel &channel = _channels.find(_clients[it->fd].getChannel())->second;
 	if (channel.is_operator(_clients[it->fd]) == false)
 	{
-		sen(it->fd, "\033[0;31mError\033[0m : You are not operator of this channel\r\n");
+		send_msg(it->fd, "\033[0;31mError\033[0m : You are not operator of this channel\r\n");
 		return ;
 	}
 	if (channel.is_user(it1->second) == false){
-		sen(it1->first, "\033[0;31mError\033[0m : ", tokens[1].c_str(), " is not in this channel\r\n", "END");
+		send_list(it1->first, "\033[0;31mError\033[0m : ", tokens[1].c_str(), " is not in this channel\r\n", "END");
 		return ;
 	}
 	channel.remove_user(it1->second);
-	sen(it->fd, "\033[0;32mSuccess\033[0m : You kicked ", tokens[1].c_str(), "\r\n", "END");
-	sen(it1->first, "\033[0;32mSuccess\033[0m : You have been kicked from ", channel.getname().c_str(), "\r\n", "END");
+	send_list(it->fd, "\033[0;32mSuccess\033[0m : You kicked ", tokens[1].c_str(), "\r\n", "END");
+	send_list(it1->first, "\033[0;32mSuccess\033[0m : You have been kicked from ", channel.getname().c_str(), "\r\n", "END");
 	std::cout << SERVERSPEAK << "Client #" << it->fd << " kicked " << tokens[1] << " from channel " << channel.getname() << std::endl;
 }
 
@@ -342,7 +342,7 @@ void Server::handleSendMessageChannel(std::string command, std::vector<pollfd>::
 	for (std::vector<Client>::const_iterator it1 = users.begin(); it1 != users.end(); it1++)
 	{
 		if (it1->getFd() != it->fd)
-			sen(it1->getFd(), "\033[0;32m[CHANNEL ", channel.getname().c_str(), "]\033[0m : ", _clients[it->fd].getNickname().c_str(), " : ", command.c_str(), "\r\n", "END");
+			send_list(it1->getFd(), "\033[0;32m[CHANNEL ", channel.getname().c_str(), "]\033[0m : ", _clients[it->fd].getNickname().c_str(), " : ", command.c_str(), "\r\n", "END");
 	}
 }
 
@@ -357,8 +357,7 @@ void Server::handleTopicCommand(std::string command, std::vector<pollfd>::iterat
 	(void) it;
 }
 
-void Server::handleDemoteCommand(std::string command, std::vector<pollfd>::iterator &it)
-{
+void Server::handleDemoteCommand(std::string command, std::vector<pollfd>::iterator &it) {
 	(void) command;
 	(void) it;
 }
@@ -378,7 +377,7 @@ int	Server::commandExec(std::string inputUser, std::vector<pollfd>::iterator& it
 	else if (checkCommand == "QUIT" || checkCommand == "EXIT")
 		quitClient(it);
 	else if (_clients[it->fd].getRegistered() == 0)
-		sen(it->fd, "\033[0;31mError\033[0m : You have to be registered to do anything on the server\r\n");
+		send_msg(it->fd, "\033[0;31mError\033[0m : You have to be registered to do anything on the server\r\n");
 	else if (checkCommand == "NICK" && inputUser.length() > 5)
 		handleNickCommand(inputUser, it);
 	else if (_clients[it->fd].getNicked() == 0)

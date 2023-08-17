@@ -6,7 +6,7 @@
 /*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:16 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/17 19:07:52 by maserrie         ###   ########.fr       */
+/*   Updated: 2023/08/17 22:06:49 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,11 +45,11 @@ void Server::welcomeMessage(int fd) {
 	send(fd, "Use the NICK command to be nicked !\r\n", 38, 0);
 }
 
-void sen(int fd, std::string msg) {
+void send_msg(int fd, std::string msg) {
 	send(fd, msg.c_str(), strlen(msg.c_str()), 0);
 }
 
-void sen(int fd, ...) {
+void send_list(int fd, ...) {
 	va_list ap;
 	va_start(ap, fd);
 	std::string msg;
