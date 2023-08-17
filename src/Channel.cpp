@@ -6,7 +6,7 @@
 /*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:09 by rstride           #+#    #+#             */
-/*   Updated: 2023/08/17 19:15:51 by maserrie         ###   ########.fr       */
+/*   Updated: 2023/08/18 01:09:56 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,11 @@
 	}
 
 	/* ~~ Setters ~~ */
+	void Channel::set_topic(const std::string& topic) {_topic = topic;}
+	void Channel::set_invite_only(bool invite_only) {_invite_only = invite_only;}
+	void Channel::set_topic_opers_only(bool topic_opers_only) {_topic_opers_only = topic_opers_only;}
+	void Channel::set_password_protected(bool password_protected) {this->password_protected = password_protected;}
+	void Channel::set_key(const std::string& key) {this->_key = key;}
 	bool Channel::remove_user(Client& user) {
 		std::vector<Client>::iterator it = std::find(_clients.begin(), _clients.end(), user);
 		if (it != _clients.end()) {

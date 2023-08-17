@@ -6,7 +6,7 @@
 /*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:11 by rstride           #+#    #+#             */
-/*   Updated: 2023/08/17 21:38:09 by maserrie         ###   ########.fr       */
+/*   Updated: 2023/08/18 01:29:33 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,11 +52,8 @@ void Server::botCommand(std::string command, std::vector<pollfd>::iterator &it) 
 	while (std::getline(stream, token, delimiter)) {
 		tokens.push_back(token);
 	}
-	if (tokens.size() < 2) {
-		send(it->fd, "\033[0;31mError\033[0m : Not enough arguments\r\n", 41, 0);
-		return ;
-	} else if (tokens.size() > 2) {
-		send(it->fd, "\033[0;31mError\033[0m : Too many arguments\r\n", 39, 0);
+	if (tokens.size() != 2) {
+		send_msg(it->fd, "\033[0;31mBot\033[0m bad usage : try /help bot\r\n");
 		return ;
 	}
 	std::string cmd = tokens[0];
@@ -93,7 +90,7 @@ void Server::handlePrivMsg(std::string command, std::vector<pollfd>::iterator& i
         tokens.push_back(token);
     }
 	if (tokens.size() < 3) {
-		send(it->fd, "\033[0;31mError\033[0m : Not enough arguments\r\n", 41, 0);
+		send_msg(it->fd, "\033[0;31mPrivmsg\033[0m bad usage : try /help privmsg\r\n");
 		return ;
 	}
 	std::string nick = tokens[1];
@@ -178,13 +175,7 @@ void Server::handleListCommand(std::vector<pollfd>::iterator &it) {
 
 void	Server::handleCreateCommand(std::string command, std::vector<pollfd>::iterator &it)
 {
-	std::vector <std::string> tokens;
-	std::istringstream stream(command);
-	std::string token;
-
-	while (std::getline(stream, token, ' ')) {
-		tokens.push_back(token);
-	}
+	std::vector <std::string> tokens = split(command, " ");
 	if (_clients[it->fd].getInChannel() == true)
 	{
 		send(it->fd, "\033[0;31mError\033[0m : You are already in a channel\r\n", 47, 0);
@@ -192,7 +183,7 @@ void	Server::handleCreateCommand(std::string command, std::vector<pollfd>::itera
 	}
 	if (tokens.size() != 3)
 	{
-		send(it->fd, "\033[0;31mError\033[0m : create [channel name] [topic]\r\n", 50, 0);
+		send_msg(it->fd, "\033[0;31mCreate\033[0m bad usage : try /help create\r\n");
 		return ;
 	}
 	for (std::map<std::string, Channel>::iterator it_channel = _channels.begin(); it_channel != _channels.end(); it_channel++)
@@ -215,13 +206,7 @@ void	Server::handleCreateCommand(std::string command, std::vector<pollfd>::itera
 
 void	Server::handleJoinCommand(std::string command, std::vector<pollfd>::iterator &it)
 {
-	std::vector <std::string> tokens;
-	std::istringstream stream(command);
-	std::string token;
-
-	while (std::getline(stream, token, ' ')) {
-		tokens.push_back(token);
-	}
+	std::vector <std::string> tokens = split(command, " ");
 	if (_clients[it->fd].getInChannel() == true)
 	{
 		send(it->fd, "\033[0;31mError\033[0m : You are already in a channel\r\n", 47, 0);
@@ -229,7 +214,7 @@ void	Server::handleJoinCommand(std::string command, std::vector<pollfd>::iterato
 	}
 	if (tokens.size() != 2)
 	{
-		send(it->fd, "\033[0;31mError\033[0m : join [channel name]\r\n", 41, 0);
+		send_msg(it->fd, "\033[0;31mJoin\033[0m bad usage : try /help join\r\n");
 		return ;
 	}
 	for (std::map<std::string, Channel>::iterator it_channel = _channels.begin(); it_channel != _channels.end(); it_channel++)
@@ -253,23 +238,13 @@ void	Server::handleJoinCommand(std::string command, std::vector<pollfd>::iterato
 
 void Server::handleInviteCommand(std::string command, std::vector<pollfd>::iterator &it)
 {
-	std::vector <std::string> tokens;
-	std::istringstream stream(command);
-	std::string token;
-	while (std::getline(stream, token, ' ')) {
-		tokens.push_back(token);
-	}
+	std::vector <std::string> tokens = split(command, " ");
 	if (tokens.size() != 3)
-	{
-		send_msg(it->fd, "\033[0;31mError\033[0m : invite [channel name] [nickname]\r\n");
-		return ;
-	}
+		return (send_msg(it->fd, "\033[0;31mInvite\033[0m bad usage : try /help invite\r\n"));
 	std::map<int, Client>::iterator it1 = _clients.begin();
 	while (!(it1 == _clients.end()))
-	{
 		if (it1->second.getUsername() == tokens[2])
 			break ;
-	}
 	if (it1 == _clients.end())
 	{
 		send(it->fd, "\033[0;31mError\033[0m : Nickname not found\r\n", 40, 0);
@@ -300,16 +275,10 @@ void Server::handleInviteCommand(std::string command, std::vector<pollfd>::itera
 
 void Server::handleKickCommand(std::string command, std::vector<pollfd>::iterator &it)
 {
-	std::vector <std::string> tokens;
-	std::istringstream stream(command);
-	std::string token;
-
-	while (std::getline(stream, token, ' ')) {
-		tokens.push_back(token);
-	}
+	std::vector <std::string> tokens = split(command, " ");
 	if (tokens.size() != 2)
 	{
-		send_msg(it->fd, "\033[0;31mError\033[0m : kick [nickname]\r\n");
+		send_msg(it->fd, "\033[0;31mKick\033[0m bad usage : try /help kick\r\n");
 		return ;
 	}
 	std::map<int, Client>::iterator it1 = _clients.find(it->fd);
@@ -342,28 +311,43 @@ void Server::handleSendMessageChannel(std::string command, std::vector<pollfd>::
 	for (std::vector<Client>::const_iterator it1 = users.begin(); it1 != users.end(); it1++)
 	{
 		if (it1->getFd() != it->fd)
-			send_list(it1->getFd(), "\033[0;32m[CHANNEL ", channel.getname().c_str(), "]\033[0m : ", _clients[it->fd].getNickname().c_str(), " : ", command.c_str(), "\r\n", "END");
+			send_list(it1->getFd(), "\033[0;32m", _clients[it->fd].getNickname().c_str(), " : ", command.c_str(), "\r\n", "END");
 	}
 }
 
-void Server::handleModeCommand(std::string command, std::vector<pollfd>::iterator &it)
-{
-	(void) command;
-	(void) it;
+void Server::handleModeCommand(std::string command, std::vector<pollfd>::iterator &it) {
+	std::vector <std::string> tokens = split(command, " ");
+	if (tokens.size() < 2)
+	{
+		send_msg(it->fd, "\033[0;31mMode\033[0m bad usage : try /help mode\r\n");
+		return ;
+	}
+	Channel &channel = _channels.find(_clients[it->fd].getChannel())->second;
+	if (channel.is_operator(_clients[it->fd]) == false)
+	{
+		send_msg(it->fd, "\033[0;31mError\033[0m : You are not operator of this channel\r\n");
+		return ;
+	}
+	if (tokens[1] == "-i")
+	{
+		if (channel.get_invite_only() == false)
+		{
+			channel.set_invite_only(true);
+			std::cout << SERVERSPEAK << "Client #" << it->fd << " set channel " << channel.getname() << " to invite only" << std::endl;
+			send_list(it->fd, "\033[0;32mSuccess\033[0m : You set channel ", channel.getname().c_str(), " to invite only\r\n", "END");
+			handleSendMessageChannel("Your channel have been set invite only", it);
+		}
+		else
+		{
+			channel.set_invite_only(false);
+			std::cout << SERVERSPEAK << "Client #" << it->fd << " set channel " << channel.getname() << " to not invite only" << std::endl;
+			send_list(it->fd, "\033[0;32mSuccess\033[0m : You set channel ", channel.getname().c_str(), " to not invite only\r\n", "END");
+			handleSendMessageChannel("Your channel have been set not invite only", it);
+		}
+	}
 }
 
 void Server::handleTopicCommand(std::string command, std::vector<pollfd>::iterator &it){
-	(void) command;
-	(void) it;
-}
-
-void Server::handleDemoteCommand(std::string command, std::vector<pollfd>::iterator &it) {
-	(void) command;
-	(void) it;
-}
-
-void Server::handlePromoteCommand(std::string command, std::vector<pollfd>::iterator &it)
-{
 	(void) command;
 	(void) it;
 }
@@ -381,7 +365,7 @@ int	Server::commandExec(std::string inputUser, std::vector<pollfd>::iterator& it
 	else if (checkCommand == "NICK" && inputUser.length() > 5)
 		handleNickCommand(inputUser, it);
 	else if (_clients[it->fd].getNicked() == 0)
-		send(it->fd, "\033[0;31mError\033[0m : You have to be nicked to do anything on the server\r\n", 66, 0);
+		send_msg(it->fd, "\033[0;31mError\033[0m : You have to be nicked to do anything on the server\r\n");
 	else if (checkCommand == "PRIVMSG")
 		handlePrivMsg(inputUser, it);
 	else if (checkCommand == "CREATE")
@@ -398,10 +382,6 @@ int	Server::commandExec(std::string inputUser, std::vector<pollfd>::iterator& it
 		handleInviteCommand(inputUser, it);
 	else if (checkCommand == "KICK")
 		handleKickCommand(inputUser, it);
-	else if (checkCommand == "PROMOTE")
-		handlePromoteCommand(inputUser, it);
-	else if (checkCommand == "DEMOTE")
-		handleDemoteCommand(inputUser, it);
 	else if (checkCommand == "TOPIC")
 		handleTopicCommand(inputUser, it);
 	else if (checkCommand == "MODE")

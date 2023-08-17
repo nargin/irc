@@ -6,7 +6,7 @@
 /*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:04 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/17 22:06:37 by maserrie         ###   ########.fr       */
+/*   Updated: 2023/08/18 00:51:37 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,3 +43,4 @@ int	printError(std::string error);
 void setDatetime(struct tm *time);
 void send_msg(int fd, std::string msg);
 void send_list(int fd, ...);
+std::vector<std::string> split(std::string str, std::string token);
