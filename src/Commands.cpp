@@ -6,7 +6,7 @@
 /*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:11 by rstride           #+#    #+#             */
-/*   Updated: 2023/08/17 16:03:24 by maserrie         ###   ########.fr       */
+/*   Updated: 2023/08/17 20:14:50 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,8 @@ namespace patch
 {
     template < typename T > std::string to_string( const T& n )
     {
-        std::ostringstream stm ;
-        stm << n ;
+		std::ostringstream stm ;
+		stm << n ;
 		return stm.str() ;
     }
 }
@@ -32,7 +32,10 @@ void Server::quitClient(std::vector<pollfd>::iterator &it) {
 		it_channel->second.remove_operator(_clients[it->fd]);
 		it_channel->second.remove_user(_clients[it->fd]);
 		if (it_channel->second.get_users().size() == 0)
+		{
 			_channels.erase(it_channel++);
+			std::cout << SERVERSPEAK << "Channel " << it_channel->first << " has been deleted" << std::endl;
+		}
 		else
 			++it_channel;
 	}
@@ -81,10 +84,6 @@ void Server::botCommand(std::string command, std::vector<pollfd>::iterator &it) 
 }
 
 void Server::handlePrivMsg(std::string command, std::vector<pollfd>::iterator& it) {
-	if (_clients[it->fd].getRegistered() == 0 && _clients[it->fd].getNicked() == 1) {
-		send(it->fd, "\033[0;31mError\033[0m : You have to be registered/nicked to send private message\r\n", 78, 0);
-		return ;
-	}
 	std::vector<std::string> tokens;
     std::istringstream stream(command);
     std::string token;
@@ -100,7 +99,7 @@ void Server::handlePrivMsg(std::string command, std::vector<pollfd>::iterator& i
 	std::string nick = tokens[1];
 	std::string msg = tokens[2];
 	std::map<int, Client>::iterator it1 = _clients.find(it->fd);
-	if (it1 != _clients.end() && it1->second.getNicked() == 1) {
+	if (it1 != _clients.end()) {
 		std::map<int, Client>::iterator it2 = _clients.begin();
 		while (it2 != _clients.end()) {
 			if (it2->second.getNickname() == nick) {
@@ -127,9 +126,6 @@ void Server::handlePrivMsg(std::string command, std::vector<pollfd>::iterator& i
 		}
 		send(it1->second.getFd(), "\033[0;31mError\033[0m : Nickname not found\r\n", 40, 0);
 	}
-	else
-		send(it1->second.getFd(), "\033[0;31mError\033[0m : You have to be registered/nicked to send private message\r\n", 78, 0);
-
 }
 
 void Server::handlePassCommand(std::string command, std::vector<pollfd>::iterator& iter) {
@@ -149,10 +145,6 @@ void Server::handlePassCommand(std::string command, std::vector<pollfd>::iterato
 }
 
 void	Server::handleNickCommand(std::string command, std::vector<pollfd>::iterator& it) {
-	if (_clients[it->fd].getRegistered() == 0) {
-		send(it->fd, "\033[0;31mError\033[0m : You have to be registered to set nickname\r\n", 64, 0);
-		return ;
-	}
 	if (command.length() < 7) {
 		send(it->fd, "\033[0;31mError : Nickname too short\033[0m\r\n", 43, 0);
 		return ;
@@ -172,14 +164,6 @@ void	Server::handleNickCommand(std::string command, std::vector<pollfd>::iterato
 }
 
 void Server::handleListCommand(std::vector<pollfd>::iterator &it) {
-	if (_clients[it->fd].getRegistered() == 0) {
-		send(it->fd, "\033[0;31mError\033[0m : You have to be registered to list channels\r\n", 66, 0);
-		return ;
-	}
-	if (_clients[it->fd].getNicked() == 0) {
-		send(it->fd, "\033[0;31mError\033[0m : You have to be nicked to list channels\r\n", 62, 0);
-		return ;
-	}
 	if (_channels.size() == 0) {
 		send(it->fd, "No channel available\r\n", 22, 0);
 		return ;
@@ -194,20 +178,17 @@ void Server::handleListCommand(std::vector<pollfd>::iterator &it) {
 
 void	Server::handleCreateCommand(std::string command, std::vector<pollfd>::iterator &it)
 {
-	if (_clients[it->fd].getRegistered() == 0) {
-		send(it->fd, "\033[0;31mError\033[0m : You have to be registered to create a channel\r\n", 68, 0);
-		return ;
-	}
-	if (_clients[it->fd].getNicked() == 0) {
-		send(it->fd, "\033[0;31mError\033[0m : You have to be nicked to create a channel\r\n", 68, 0);
-		return ;
-	}
 	std::vector <std::string> tokens;
 	std::istringstream stream(command);
 	std::string token;
 
 	while (std::getline(stream, token, ' ')) {
 		tokens.push_back(token);
+	}
+	if (_clients[it->fd].getInChannel() == true)
+	{
+		send(it->fd, "\033[0;31mError\033[0m : You are already in a channel\r\n", 47, 0);
+		return ;
 	}
 	if (tokens.size() != 3)
 	{
@@ -223,6 +204,10 @@ void	Server::handleCreateCommand(std::string command, std::vector<pollfd>::itera
 		}
 	}
 	Channel new_channel(tokens[1], tokens[2]);
+	_clients[it->fd].setInChannel(true);
+	_clients[it->fd].setChannel(tokens[1]);
+	new_channel.add_user(_clients[it->fd]);
+	new_channel.add_operator(_clients[it->fd]);
 	_channels.insert(std::pair<std::string, Channel>(tokens[1], new_channel));
 	send(it->fd, "\033[0;32mSuccess\033[0m : You created the channel\r\n", 47, 0);
 	std::cout << SERVERSPEAK << "Client #" << it->fd << " created channel " << tokens[1] << " which talk about " << tokens[2] << std::endl;
@@ -230,14 +215,6 @@ void	Server::handleCreateCommand(std::string command, std::vector<pollfd>::itera
 
 void	Server::handleJoinCommand(std::string command, std::vector<pollfd>::iterator &it)
 {
-	if (_clients[it->fd].getRegistered() == 0) {
-		send(it->fd, "\033[0;31mError\033[0m : You have to be registered to join a channel\r\n", 70, 0);
-		return ;
-	}
-	if (_clients[it->fd].getNicked() == 0) {
-		send(it->fd, "\033[0;31mError\033[0m : You have to be nicked to join a channel\r\n", 66, 0);
-		return ;
-	}
 	std::vector <std::string> tokens;
 	std::istringstream stream(command);
 	std::string token;
@@ -245,7 +222,12 @@ void	Server::handleJoinCommand(std::string command, std::vector<pollfd>::iterato
 	while (std::getline(stream, token, ' ')) {
 		tokens.push_back(token);
 	}
-	if (tokens.size() != 3)
+	if (_clients[it->fd].getInChannel() == true)
+	{
+		send(it->fd, "\033[0;31mError\033[0m : You are already in a channel\r\n", 47, 0);
+		return ;
+	}
+	if (tokens.size() != 2)
 	{
 		send(it->fd, "\033[0;31mError\033[0m : join [channel name]\r\n", 41, 0);
 		return ;
@@ -254,16 +236,137 @@ void	Server::handleJoinCommand(std::string command, std::vector<pollfd>::iterato
 	{
 		if (it_channel->first == tokens[1])
 		{
-			if (it_channel->second.get_invite_only() == true) {
+			if (it_channel->second.get_invite_only() == true && !it_channel->second.is_invite(_clients[it->fd])) {
 				send(it->fd, "\033[0;31mError\033[0m : Channel is invite only\r\n", 43, 0);
 				return ;
 			}
 			it_channel->second.add_user(_clients[it->fd]);
+			_clients[it->fd].setInChannel(true);
+			_clients[it->fd].setChannel(tokens[1]);
 			send(it->fd, "\033[0;32mSuccess\033[0m : You joined the channel\r\n", 45, 0);
+			std::cout << SERVERSPEAK << "Client #" << it->fd << " joined channel " << tokens[1] << std::endl;
 			return ;
 		}
 	}
 	send(it->fd, "\033[0;31mError\033[0m : Channel not found\r\n", 38, 0);
+}
+
+void Server::handleInviteCommand(std::string command, std::vector<pollfd>::iterator &it)
+{
+	std::vector <std::string> tokens;
+	std::istringstream stream(command);
+	std::string token;
+	while (std::getline(stream, token, ' ')) {
+		tokens.push_back(token);
+	}
+	if (tokens.size() != 3)
+	{
+		sen(it->fd, "\033[0;31mError\033[0m : invite [channel name] [nickname]\r\n");
+		return ;
+	}
+	std::map<int, Client>::iterator it1 = _clients.begin();
+	while (!(it1 == _clients.end()))
+	{
+		if (it1->second.getUsername() == tokens[2])
+			break ;
+	}
+	if (it1 == _clients.end())
+	{
+		send(it->fd, "\033[0;31mError\033[0m : Nickname not found\r\n", 40, 0);
+		return ;
+	}
+	std::map<std::string, Channel>::iterator it2 = _channels.find(tokens[1]);
+	if (it2 == _channels.end())
+	{
+		send(it->fd, "\033[0;31mError\033[0m : Channel not found\r\n", 38, 0);
+		return ;
+	}
+	Channel &channel = it2->second;
+	if (channel.is_user(_clients[it->fd]) == false)
+	{
+		sen(it->fd, "\033[0;31mError\033[0m : You are not in this channel\r\n");
+		return ;
+	}
+	if (channel.is_operator(_clients[it->fd]) == false)
+	{
+		sen(it->fd, "\033[0;31mError\033[0m : You are not operator of this channel\r\n");
+		return ;
+	}
+	channel.add_invite(_clients[it1->first]);
+	sen(it->fd, "\033[0;32mSuccess\033[0m : You invited ", tokens[2].c_str(), " to ", tokens[1].c_str(), "\r\n", "END");
+	sen(it1->first, "\033[0;32mSuccess\033[0m : You have been invited to ", tokens[1].c_str(), "\r\n", "END");
+	std::cout << SERVERSPEAK << "Client #" << it->fd << " invited " << tokens[2] << " to channel " << tokens[1] << std::endl;
+}
+
+void Server::handleKickCommand(std::string command, std::vector<pollfd>::iterator &it)
+{
+	std::vector <std::string> tokens;
+	std::istringstream stream(command);
+	std::string token;
+
+	while (std::getline(stream, token, ' ')) {
+		tokens.push_back(token);
+	}
+	if (tokens.size() != 2)
+	{
+		sen(it->fd, "\033[0;31mError\033[0m : kick [nickname]\r\n");
+		return ;
+	}
+	std::map<int, Client>::iterator it1 = _clients.find(it->fd);
+	if (it1 == _clients.end())
+	{
+		send(it->fd, "\033[0;31mError\033[0m : Nickname not found\r\n", 40, 0);
+		return ;
+	}
+	Channel &channel = _channels.find(_clients[it->fd].getChannel())->second;
+	if (channel.is_operator(_clients[it->fd]) == false)
+	{
+		sen(it->fd, "\033[0;31mError\033[0m : You are not operator of this channel\r\n");
+		return ;
+	}
+	if (channel.is_user(it1->second) == false){
+		sen(it1->first, "\033[0;31mError\033[0m : ", tokens[1].c_str(), " is not in this channel\r\n", "END");
+		return ;
+	}
+	channel.remove_user(it1->second);
+	sen(it->fd, "\033[0;32mSuccess\033[0m : You kicked ", tokens[1].c_str(), "\r\n", "END");
+	sen(it1->first, "\033[0;32mSuccess\033[0m : You have been kicked from ", channel.getname().c_str(), "\r\n", "END");
+	std::cout << SERVERSPEAK << "Client #" << it->fd << " kicked " << tokens[1] << " from channel " << channel.getname() << std::endl;
+}
+
+void Server::handleSendMessageChannel(std::string command, std::vector<pollfd>::iterator &it)
+{
+	Channel &channel = _channels.find(_clients[it->fd].getChannel())->second;
+	std::cout << SERVERSPEAK << "Client #" << it->fd << " sent message to channel " << channel.getname() << std::endl;
+	const std::vector<Client> &users = channel.get_users();
+	for (std::vector<Client>::const_iterator it1 = users.begin(); it1 != users.end(); it1++)
+	{
+		if (it1->getFd() != it->fd)
+			sen(it1->getFd(), "\033[0;32m[CHANNEL ", channel.getname().c_str(), "]\033[0m : ", _clients[it->fd].getNickname().c_str(), " : ", command.c_str(), "\r\n", "END");
+	}
+}
+
+void Server::handleModeCommand(std::string command, std::vector<pollfd>::iterator &it)
+{
+	(void) command;
+	(void) it;
+}
+
+void Server::handleTopicCommand(std::string command, std::vector<pollfd>::iterator &it){
+	(void) command;
+	(void) it;
+}
+
+void Server::handleDemoteCommand(std::string command, std::vector<pollfd>::iterator &it)
+{
+	(void) command;
+	(void) it;
+}
+
+void Server::handlePromoteCommand(std::string command, std::vector<pollfd>::iterator &it)
+{
+	(void) command;
+	(void) it;
 }
 
 int	Server::commandExec(std::string inputUser, std::vector<pollfd>::iterator& it) {
@@ -272,12 +375,16 @@ int	Server::commandExec(std::string inputUser, std::vector<pollfd>::iterator& it
 
 	if (checkCommand == "PASS" && inputUser.length() > 5 && _clients.find(it->fd) != _clients.end())
 		handlePassCommand(inputUser, it);
-	else if (checkCommand == "NICK" && inputUser.length() > 5)
-		handleNickCommand(inputUser, it);
-	else if (checkCommand == "PRIVMSG")
-		handlePrivMsg(inputUser, it);
 	else if (checkCommand == "QUIT" || checkCommand == "EXIT")
 		quitClient(it);
+	else if (_clients[it->fd].getRegistered() == 0)
+		sen(it->fd, "\033[0;31mError\033[0m : You have to be registered to do anything on the server\r\n");
+	else if (checkCommand == "NICK" && inputUser.length() > 5)
+		handleNickCommand(inputUser, it);
+	else if (_clients[it->fd].getNicked() == 0)
+		send(it->fd, "\033[0;31mError\033[0m : You have to be nicked to do anything on the server\r\n", 66, 0);
+	else if (checkCommand == "PRIVMSG")
+		handlePrivMsg(inputUser, it);
 	else if (checkCommand == "CREATE")
 		handleCreateCommand(inputUser, it);
 	else if (checkCommand == "JOIN")
@@ -286,21 +393,28 @@ int	Server::commandExec(std::string inputUser, std::vector<pollfd>::iterator& it
 		handleListCommand(it);
 	else if (checkCommand == "/BOT")
 		botCommand(inputUser, it);
+	else if (_clients[it->fd].getInChannel() == false)
+		return (0);
+	else if (checkCommand == "INVITE")
+		handleInviteCommand(inputUser, it);
+	else if (checkCommand == "KICK")
+		handleKickCommand(inputUser, it);
+	else if (checkCommand == "PROMOTE")
+		handlePromoteCommand(inputUser, it);
+	else if (checkCommand == "DEMOTE")
+		handleDemoteCommand(inputUser, it);
+	else if (checkCommand == "TOPIC")
+		handleTopicCommand(inputUser, it);
+	else if (checkCommand == "MODE")
+		handleModeCommand(inputUser, it);
 	else
-		return 0;
+		handleSendMessageChannel(inputUser, it);
 	return 1;
-
 }
 
 void Server::parseInput(std::string inputUser, std::vector<pollfd>::iterator& iter) {
 	if (commandExec(inputUser, iter))
 		return ;
-	else if (_clients.find(iter->fd) != _clients.end() && _clients[iter->fd].getRegistered() == 0 && _clients[iter->fd].getNicked() == 0) {
-		send(iter->fd, "\033[0;31mError\033[0m : You have to be registered to send messages\r\n", 64, 0);
-	}
-	else if (_clients.find(iter->fd) != _clients.end() && _clients[iter->fd].getRegistered() && _clients[iter->fd].getNicked() == 0) {
-		send(iter->fd, "\033[0;31mError\033[0m : You have to be nicked to send messages\r\n", 60, 0);
-	}
 	else {
 		if (_clients[iter->fd].getRegistered()) std::cout << CLIENTSPEAK;
 		std::cout << "Client ";

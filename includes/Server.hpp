@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
+/*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:07 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/15 13:11:38 by romaurel         ###   ########.fr       */
+/*   Updated: 2023/08/17 18:10:58 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,13 @@ class Server {
 		void botCommand(std::string command, std::vector<pollfd>::iterator &it);
 		void handleCreateCommand(std::string command, std::vector<pollfd>::iterator &it);
 		void handleJoinCommand(std::string command, std::vector<pollfd>::iterator &it);
+		void handleInviteCommand(std::string command, std::vector<pollfd>::iterator &it);
+		void handleKickCommand(std::string command, std::vector<pollfd>::iterator &it);
+		void handlePromoteCommand(std::string command, std::vector<pollfd>::iterator &it);
+		void handleDemoteCommand(std::string command, std::vector<pollfd>::iterator &it);
+		void handleTopicCommand(std::string command, std::vector<pollfd>::iterator &it);
+		void handleModeCommand(std::string command, std::vector<pollfd>::iterator &it);
+		void handleSendMessageChannel(std::string command, std::vector<pollfd>::iterator &it);
 
 		/* ~~ Getters ~~ */
 		int getNbUsers();
@@ -65,4 +72,6 @@ class Server {
 		int getSockfd();
 		std::string getDateTime();
 		std::string getPass();
+		Channel &getChannel(std::string name);
+		std::map<int, Client>::iterator getClient(std::string name);
 };

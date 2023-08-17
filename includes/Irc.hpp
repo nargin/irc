@@ -6,7 +6,7 @@
 /*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:04 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/14 16:25:22 by maserrie         ###   ########.fr       */
+/*   Updated: 2023/08/17 19:07:16 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@
 #include <sstream>
 #include <algorithm>
 #include <iterator>
+#include <cstdarg>
 
 #include "Macro.hpp"
 
@@ -41,4 +42,5 @@
 int	printError(std::string error);
 void setDatetime(struct tm *time);
 void sen(int fd, std::string msg);
+void sen(int fd, ...);
 

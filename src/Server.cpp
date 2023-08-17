@@ -231,3 +231,11 @@ int Server::getPort() { return this->_port; }
 int Server::getSockfd() { return this->_sockfd; }
 std::string Server::getDateTime() { return this->_datetime; }
 std::string Server::getPass() { return this->_pass; }
+std::map<int, Client>::iterator Server::getClient(std::string name) {
+	for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); ++it) {
+		if (it->second.getNickname() == name)
+			return it;
+	}
+	return _clients.end();
+}
+

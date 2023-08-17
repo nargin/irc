@@ -6,7 +6,7 @@
 /*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:16 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/15 19:07:02 by maserrie         ###   ########.fr       */
+/*   Updated: 2023/08/17 19:07:52 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,4 +47,14 @@ void Server::welcomeMessage(int fd) {
 
 void sen(int fd, std::string msg) {
 	send(fd, msg.c_str(), strlen(msg.c_str()), 0);
+}
+
+void sen(int fd, ...) {
+	va_list ap;
+	va_start(ap, fd);
+	std::string msg;
+	while ((msg = va_arg(ap, char *)) != "END") {
+		send(fd, msg.c_str(), strlen(msg.c_str()), 0);
+	}
+	va_end(ap);
 }
