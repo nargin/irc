@@ -6,7 +6,7 @@
 /*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:11 by rstride           #+#    #+#             */
-/*   Updated: 2023/08/15 18:00:46 by maserrie         ###   ########.fr       */
+/*   Updated: 2023/08/17 16:03:24 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,19 +20,21 @@ namespace patch
     {
         std::ostringstream stm ;
         stm << n ;
-        return stm.str() ;
+		return stm.str() ;
     }
 }
 
 void Server::quitClient(std::vector<pollfd>::iterator &it) {
 	std::cout << SERVERSPEAK << "Client #" << it->fd << " disconnected with quit command" << std::endl;
 	send(it->fd, "You have been disconnected\r\n", 28, 0);
-	for (std::map<std::string, Channel>::iterator it_channel = _channels.begin(); it_channel != _channels.end(); it_channel++)
+	for (std::map<std::string, Channel>::iterator it_channel = _channels.begin(); it_channel != _channels.end(); )
 	{
 		it_channel->second.remove_operator(_clients[it->fd]);
 		it_channel->second.remove_user(_clients[it->fd]);
 		if (it_channel->second.get_users().size() == 0)
-			_channels.erase(it_channel);
+			_channels.erase(it_channel++);
+		else
+			++it_channel;
 	}
 	close(it->fd);
 	_clients.erase(it->fd);
