@@ -6,7 +6,7 @@
 /*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:09 by rstride           #+#    #+#             */
-/*   Updated: 2023/08/18 01:09:56 by maserrie         ###   ########.fr       */
+/*   Updated: 2023/08/18 02:20:06 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,10 @@
 	bool	Channel::is_invite(Client &user) const {return std::find(_invites.begin(), _invites.end(), user) != _invites.end();}
 	std::vector<Client> Channel::get_users() const {return _clients;}
 	bool	Channel::get_invite_only() const {return _invite_only;}
+	bool Channel::get_topic_opers_only() const {return _topic_opers_only;}
+	bool Channel::get_password_protected() const {return password_protected;}
+	std::string Channel::get_key() const {return _key;}
+	int	Channel::get_limit() const {return _limit;}
 	bool Channel::is_user(const Client& client) const {
 		for (std::vector<Client>::const_iterator it = _clients.begin(); it != _clients.end(); ++it) {
 			if (*it == client)
@@ -65,6 +69,7 @@
 	void Channel::set_topic_opers_only(bool topic_opers_only) {_topic_opers_only = topic_opers_only;}
 	void Channel::set_password_protected(bool password_protected) {this->password_protected = password_protected;}
 	void Channel::set_key(const std::string& key) {this->_key = key;}
+	void Channel::set_limit(int limit) {if (limit < 0) return; this->_limit = limit;}
 	bool Channel::remove_user(Client& user) {
 		std::vector<Client>::iterator it = std::find(_clients.begin(), _clients.end(), user);
 		if (it != _clients.end()) {

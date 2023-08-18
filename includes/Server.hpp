@@ -6,7 +6,7 @@
 /*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:07 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/17 23:40:54 by maserrie         ###   ########.fr       */
+/*   Updated: 2023/08/18 02:22:35 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,7 @@ class Server {
 		void handleTopicCommand(std::string command, std::vector<pollfd>::iterator &it);
 		void handleModeCommand(std::string command, std::vector<pollfd>::iterator &it);
 		void handleSendMessageChannel(std::string command, std::vector<pollfd>::iterator &it);
+		void handleHelpCommand(std::string command, std::vector<pollfd>::iterator &it);
 
 		/* ~~ Getters ~~ */
 		int getNbUsers();

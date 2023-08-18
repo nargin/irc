@@ -6,7 +6,7 @@
 /*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:11 by rstride           #+#    #+#             */
-/*   Updated: 2023/08/18 01:29:33 by maserrie         ###   ########.fr       */
+/*   Updated: 2023/08/18 02:36:22 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ void Server::botCommand(std::string command, std::vector<pollfd>::iterator &it) 
 		send(it->fd, "Available commands : ping, time, quoi, help\r\n", 45, 0);
 	}
 	else
-		send(it->fd, "\033[0;31mError\033[0m : Command not found\r\n", 40, 0);
+		send_msg(it->fd, "\033[0;31mBot\033[0m bad usage : try /help bot\r\n");
 }
 
 void Server::handlePrivMsg(std::string command, std::vector<pollfd>::iterator& it) {
@@ -225,6 +225,10 @@ void	Server::handleJoinCommand(std::string command, std::vector<pollfd>::iterato
 				send(it->fd, "\033[0;31mError\033[0m : Channel is invite only\r\n", 43, 0);
 				return ;
 			}
+			if (it_channel->second.get_limit() && it_channel->second.get_users().size() >= (unsigned long long)it_channel->second.get_limit()) {
+				send(it->fd, "\033[0;31mError\033[0m : Channel is full\r\n", 38, 0);
+				return ;
+			}
 			it_channel->second.add_user(_clients[it->fd]);
 			_clients[it->fd].setInChannel(true);
 			_clients[it->fd].setChannel(tokens[1]);
@@ -336,20 +340,235 @@ void Server::handleModeCommand(std::string command, std::vector<pollfd>::iterato
 			std::cout << SERVERSPEAK << "Client #" << it->fd << " set channel " << channel.getname() << " to invite only" << std::endl;
 			send_list(it->fd, "\033[0;32mSuccess\033[0m : You set channel ", channel.getname().c_str(), " to invite only\r\n", "END");
 			handleSendMessageChannel("Your channel have been set invite only", it);
+			return ;
 		}
-		else
-		{
-			channel.set_invite_only(false);
-			std::cout << SERVERSPEAK << "Client #" << it->fd << " set channel " << channel.getname() << " to not invite only" << std::endl;
-			send_list(it->fd, "\033[0;32mSuccess\033[0m : You set channel ", channel.getname().c_str(), " to not invite only\r\n", "END");
-			handleSendMessageChannel("Your channel have been set not invite only", it);
-		}
+		channel.set_invite_only(false);
+		std::cout << SERVERSPEAK << "Client #" << it->fd << " set channel " << channel.getname() << " to not invite only" << std::endl;
+		send_list(it->fd, "\033[0;32mSuccess\033[0m : You set channel ", channel.getname().c_str(), " to not invite only\r\n", "END");
+		handleSendMessageChannel("Your channel have been set not invite only", it);
+		return ;
 	}
+	if (tokens[1] == "-t")
+	{
+		if (channel.get_topic_opers_only() == false)
+		{
+			channel.set_topic_opers_only(true);
+			std::cout << SERVERSPEAK << "Client #" << it->fd << " set channel " << channel.getname() << " to topic change for opers only" << std::endl;
+			send_list(it->fd, "\033[0;32mSuccess\033[0m : You set channel ", channel.getname().c_str(), " to topic change for opers only\r\n", "END");
+			handleSendMessageChannel("Your channel have been set topic change for opers only", it);
+			return ;
+		}
+		channel.set_topic_opers_only(false);
+		std::cout << SERVERSPEAK << "Client #" << it->fd << " set channel " << channel.getname() << " to topic change for everyone" << std::endl;
+		send_list(it->fd, "\033[0;32mSuccess\033[0m : You set channel ", channel.getname().c_str(), " to topic change for everyone\r\n", "END");
+		handleSendMessageChannel("Your channel have been set topic change for everyone", it);
+		return ;
+	}
+	if (tokens[1] == "-k")
+	{
+		if (tokens.size() != 3)
+		{
+			send_msg(it->fd, "\033[0;31mMode\033[0m bad usage : try /help mode\r\n");
+			return ;
+		}
+		if (channel.get_password_protected() == true)
+		{
+			if (tokens[2] != channel.get_key())
+			{
+				send_list(it->fd, "\033[0;31mError\033[0m : Wrong password for channel ", channel.getname().c_str(), "\r\n", "END");
+				return ;
+			}
+			channel.set_password_protected(false);
+			channel.set_key("");
+			std::cout << SERVERSPEAK << "Client #" << it->fd << " set channel " << channel.getname() << " to not password protected" << std::endl;
+			send_list(it->fd, "\033[0;32mSuccess\033[0m : You set channel ", channel.getname().c_str(), " to not password protected\r\n", "END");
+			handleSendMessageChannel("Your channel have been set not password protected and the password is", it);
+			handleSendMessageChannel(channel.get_key(), it);
+			return ;
+		}
+		channel.set_password_protected(true);
+		channel.set_key(tokens[2]);
+		std::cout << SERVERSPEAK << "Client #" << it->fd << " set channel " << channel.getname() << " to password protected" << std::endl;
+		send_list(it->fd, "\033[0;32mSuccess\033[0m : You set channel ", channel.getname().c_str(), " to password protected\r\n", "END");
+		handleSendMessageChannel("Your channel have been set password protected", it);
+		return ;
+	}
+	if (tokens[1] == "-o")
+	{
+		if (tokens.size() != 3)
+		{
+			send_msg(it->fd, "\033[0;31mMode\033[0m bad usage : try /help mode\r\n");
+			return ;
+		}
+		std::map<int, Client>::iterator it1 = getClient(tokens[2]);
+		if (it1 == _clients.end())
+		{
+			send(it->fd, "\033[0;31mError\033[0m : Nickname not found\r\n", 40, 0);
+			return ;
+		}
+		if (channel.is_user(it1->second) == false)
+		{
+			send_list(it1->first, "\033[0;31mError\033[0m : ", tokens[2].c_str(), " is not in this channel\r\n", "END");
+			return ;
+		}
+		if (channel.is_operator(it1->second) == true)
+		{
+			channel.remove_operator(it1->second);
+			send_list(it->fd, "\033[0;32mSuccess\033[0m : You removed ", tokens[2].c_str(), " operator of this channel\r\n", "END");
+			send_list(it1->first, "\033[0;32mSuccess\033[0m : You have been removed operator of this channel\r\n", "END");
+			std::cout << SERVERSPEAK << "Client #" << it->fd << " removed " << tokens[2] << " operator of channel " << channel.getname() << std::endl;
+			return ;
+		}
+		channel.add_operator(it1->second);
+		send_list(it->fd, "\033[0;32mSuccess\033[0m : You set ", tokens[2].c_str(), " operator of this channel\r\n", "END");
+		send_list(it1->first, "\033[0;32mSuccess\033[0m : You have been set operator of this channel\r\n", "END");
+		std::cout << SERVERSPEAK << "Client #" << it->fd << " set " << tokens[2] << " operator of channel " << channel.getname() << std::endl;
+		return ;
+	}
+	if (tokens[1] == "-l")
+	{
+		if (tokens.size() != 3)
+		{
+			send_msg(it->fd, "\033[0;31mMode\033[0m bad usage : try /help mode\r\n");
+			return ;
+		}
+		if (channel.get_limit() == 0)
+		{
+			channel.set_limit(atoi(tokens[2].c_str()));
+			std::cout << SERVERSPEAK << "Client #" << it->fd << " set channel " << channel.getname() << " to limited to " << tokens[2] << " users" << std::endl;
+			send_list(it->fd, "\033[0;32mSuccess\033[0m : You set channel ", channel.getname().c_str(), " to limited to ", tokens[2].c_str(), " users\r\n", "END");
+			handleSendMessageChannel("Your channel have been set limited to " + tokens[2] + " users", it);
+			return ;
+		}
+		channel.set_limit(0);
+		std::cout << SERVERSPEAK << "Client #" << it->fd << " set channel " << channel.getname() << " to not limited" << std::endl;
+		send_list(it->fd, "\033[0;32mSuccess\033[0m : You set channel ", channel.getname().c_str(), " to not limited\r\n", "END");
+		handleSendMessageChannel("Your channel have been set not limited", it);
+		return ;
+	}
+	send_msg(it->fd, "\033[0;31mMode\033[0m bad usage : try /help mode\r\n");
 }
 
 void Server::handleTopicCommand(std::string command, std::vector<pollfd>::iterator &it){
-	(void) command;
-	(void) it;
+	std::vector <std::string> tokens = split(command, " ");
+	if (tokens.size() < 2)
+	{
+		send_msg(it->fd, "\033[0;31mTopic\033[0m bad usage : try /help topic\r\n");
+		return ;
+	}
+	Channel &channel = _channels.find(_clients[it->fd].getChannel())->second;
+	if (channel.get_topic_opers_only() == true && channel.is_operator(_clients[it->fd]) == false)
+	{
+		send_msg(it->fd, "\033[0;31mError\033[0m : You are not operator of this channel\r\n");
+		return ;
+	}
+	std::string topic = command.substr(7);
+	channel.set_topic(topic);
+	std::cout << SERVERSPEAK << "Client #" << it->fd << " set channel " << channel.getname() << " topic to " << topic << std::endl;
+	send_list(it->fd, "\033[0;32mSuccess\033[0m : You set channel ", channel.getname().c_str(), " topic to ", topic.c_str(), "\r\n", "END");
+	handleSendMessageChannel("Your channel topic have been set to " + topic, it);
+}
+
+void	Server::handleHelpCommand(std::string command, std::vector<pollfd>::iterator &it) {
+	std::vector <std::string> tokens = split(command, " ");
+	if (tokens.size() > 2)
+	{
+		send_msg(it->fd, "\033[0;31mHelp\033[0m bad usage : try /help help\r\n");
+		return ;
+	}
+	if (tokens.size() == 1){
+		send_msg(it->fd, "Available commands :\r\n");
+		if (_clients[it->fd].getRegistered() == 0)
+			send_msg(it->fd, "pass : register to the server\r\n");
+		send_msg(it->fd, "nick : set your nickname\r\n");
+		send_msg(it->fd, "/help : display help\r\n");
+		send_msg(it->fd, "/bot : display bot help\r\n");
+		send_msg(it->fd, "list : list channels\r\n");
+		send_msg(it->fd, "privmsg : send private message to a user\r\n");
+		if (!_clients[it->fd].getInChannel())
+		{
+			send_msg(it->fd, "create : create a channel\r\n");
+			send_msg(it->fd, "join : join a channel\r\n");
+		}
+		if (_clients[it->fd].getInChannel() == true && _channels.find(_clients[it->fd].getChannel())->second.is_operator(_clients[it->fd]) == true)
+		{
+			send_msg(it->fd, "invite : invite a user to a channel\r\n");
+			send_msg(it->fd, "kick : kick a user from a channel\r\n");
+			send_msg(it->fd, "mode : set channel mode\r\n");
+			if (_channels.find(_clients[it->fd].getChannel())->second.get_topic_opers_only() == true)
+				send_msg(it->fd, "topic : set channel topic\r\n");
+		}
+		else if (_clients[it->fd].getInChannel() == true && _channels.find(_clients[it->fd].getChannel())->second.get_topic_opers_only() == false)
+			send_msg(it->fd, "topic : set channel topic\r\n");
+		return ;
+	}
+	std::transform(tokens[1].begin(), tokens[1].end(), tokens[1].begin(), ::tolower);
+	if (tokens[1] == "bot")
+	{
+		send_msg(it->fd, "Usage : /bot <command>\r\n");
+		send_msg(it->fd, "Available commands :\r\n");
+		send_msg(it->fd, "help : display help\r\n");
+		send_msg(it->fd, "time : display time\r\n");
+		send_msg(it->fd, "ping : display ur ping\r\n");
+		send_msg(it->fd, "quoi : try it\r\n");
+		return ;
+	}
+	if (tokens[1] == "create")
+	{
+		send(it->fd, "Usage : /create <channel_name> <topic>\r\n", 41, 0);
+		return ;
+	}
+	if (tokens[1] == "join")
+	{
+		send(it->fd, "Usage : /join <channel_name>\r\n", 30, 0);
+		return ;
+	}
+	if (tokens[1] == "invite")
+	{
+		send(it->fd, "Usage : /invite <channel_name> <nickname>\r\n", 43, 0);
+		return ;
+	}
+	if (tokens[1] == "kick")
+	{
+		send(it->fd, "Usage : /kick <nickname>\r\n", 26, 0);
+		return ;
+	}
+	if (tokens[1] == "mode")
+	{
+		send(it->fd, "Usage : /mode <channel_name> <mode>\r\n", 37, 0);
+		send(it->fd, "Available modes :\r\n", 20, 0);
+		send(it->fd, "-i : set/unset invite only\r\n", 19, 0);
+		send(it->fd, "-t : set/unset topic change for opers only\r\n", 34, 0);
+		send(it->fd, "-k <password> : set/unset password protected\r\n", 37, 0);
+		send(it->fd, "-o <nickname> : give/take operator to nickname\r\n", 44, 0);
+		send(it->fd, "-l <number> : limit/unlimit to number of users\r\n", 40, 0);
+		return ;
+	}
+	if (tokens[1] == "topic")
+	{
+		send(it->fd, "Usage : /topic <topic>\r\n", 24, 0);
+		return ;
+	}
+	if (tokens[1] == "list")
+	{
+		send(it->fd, "Usage : /list\r\n", 15, 0);
+		return ;
+	}
+	if (tokens[1] == "privmsg")
+	{
+		send(it->fd, "Usage : /privmsg <nickname> <message>\r\n", 39, 0);
+		return ;
+	}
+	if (tokens[1] == "nick")
+	{
+		send(it->fd, "Usage : /nick <nickname>\r\n", 26, 0);
+		return ;
+	}
+	if (tokens[1] == "pass")
+	{
+		send(it->fd, "Usage : /pass <password>\r\n", 26, 0);
+		return ;
+	}
 }
 
 int	Server::commandExec(std::string inputUser, std::vector<pollfd>::iterator& it) {
@@ -360,6 +579,8 @@ int	Server::commandExec(std::string inputUser, std::vector<pollfd>::iterator& it
 		handlePassCommand(inputUser, it);
 	else if (checkCommand == "QUIT" || checkCommand == "EXIT")
 		quitClient(it);
+	else if (checkCommand == "HELP")
+		handleHelpCommand(inputUser, it);
 	else if (_clients[it->fd].getRegistered() == 0)
 		send_msg(it->fd, "\033[0;31mError\033[0m : You have to be registered to do anything on the server\r\n");
 	else if (checkCommand == "NICK" && inputUser.length() > 5)

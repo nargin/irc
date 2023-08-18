@@ -6,7 +6,7 @@
 /*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:41:55 by romaurel          #+#    #+#             */
-/*   Updated: 2023/08/18 01:09:36 by maserrie         ###   ########.fr       */
+/*   Updated: 2023/08/18 02:36:10 by maserrie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ class Channel {
 		bool _invite_only;
 		bool _topic_opers_only;
 		bool password_protected;
+		int	_limit;
 
 	public:
 		Channel(const std::string& name, const std::string &topic);
@@ -51,11 +52,13 @@ class Channel {
 		bool	get_topic_opers_only() const;
 		bool	get_password_protected() const;
 		std::string	get_key() const;
+		int		get_limit() const;
 
 		void	set_topic(const std::string& topic);
 		void	set_invite_only(bool invite_only);
 		void	set_topic_opers_only(bool topic_opers_only);
 		void	set_password_protected(bool password_protected);
 		void	set_key(const std::string& key);
+		void	set_limit(int limit);
 };
 
