@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+        */
+/*   By: romaurel <romaurel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/03 03:42:11 by rstride           #+#    #+#             */
-/*   Updated: 2023/08/18 02:36:22 by maserrie         ###   ########.fr       */
+/*   Updated: 2023/08/18 16:54:05 by romaurel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,9 +166,9 @@ void Server::handleListCommand(std::vector<pollfd>::iterator &it) {
 		return ;
 	}
 
-	std::string list = "List of channels :\r\n";
+	std::string list = " --- List of channels --- \r\nName / Topic\r\n";
 	for (std::map<std::string, Channel>::iterator it_channel = _channels.begin(); it_channel != _channels.end(); it_channel++)
-		list += it_channel->first + " : " + it_channel->second.gettopic() + "\r\n";
+		list += it_channel->first + " | " + it_channel->second.gettopic() + "\r\n";
 
 	send(it->fd, list.c_str(), list.length(), 0);
 }
@@ -313,10 +313,7 @@ void Server::handleSendMessageChannel(std::string command, std::vector<pollfd>::
 	std::cout << SERVERSPEAK << "Client #" << it->fd << " sent message to channel " << channel.getname() << std::endl;
 	const std::vector<Client> &users = channel.get_users();
 	for (std::vector<Client>::const_iterator it1 = users.begin(); it1 != users.end(); it1++)
-	{
-		if (it1->getFd() != it->fd)
-			send_list(it1->getFd(), "\033[0;32m", _clients[it->fd].getNickname().c_str(), " : ", command.c_str(), "\r\n", "END");
-	}
+		send_list(it1->getFd(), "#", channel.getname().c_str(), " <", _clients[it->fd].getNickname().c_str(), ">", " : ", command.c_str(), "\r\n", "END");
 }
 
 void Server::handleModeCommand(std::string command, std::vector<pollfd>::iterator &it) {
@@ -579,7 +576,7 @@ int	Server::commandExec(std::string inputUser, std::vector<pollfd>::iterator& it
 		handlePassCommand(inputUser, it);
 	else if (checkCommand == "QUIT" || checkCommand == "EXIT")
 		quitClient(it);
-	else if (checkCommand == "HELP")
+	else if (checkCommand == "/HELP")
 		handleHelpCommand(inputUser, it);
 	else if (_clients[it->fd].getRegistered() == 0)
 		send_msg(it->fd, "\033[0;31mError\033[0m : You have to be registered to do anything on the server\r\n");

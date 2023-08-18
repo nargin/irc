@@ -6,7 +6,7 @@
 #    By: maserrie <maserrie@student.42perpignan.    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/08/03 03:42:17 by romaurel          #+#    #+#              #
-#    Updated: 2023/08/15 18:06:18 by maserrie         ###   ########.fr        #
+#    Updated: 2023/08/18 16:50:04 by romaurel         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -68,5 +68,7 @@ fclean: clean
 	@rm -rf $(NAME)
 
 re: fclean all
+
+ri : re all run
 
 .PHONY: all clean fclean re run lrun nc

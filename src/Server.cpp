@@ -134,7 +134,6 @@ int Server::receiveData(std::vector<pollfd>& fds, std::vector<pollfd>::iterator&
 		deleteClient(fds, iter);
 		return BREAK;
 	} else if (n == 0) {
-		DEBUG;
 		this->deleteClient(fds, iter);
 		return BREAK;
 	} else {
